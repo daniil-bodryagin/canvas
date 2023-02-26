@@ -23,7 +23,7 @@ html, body {
     background-color: darkgray;
 }
 
-.menuitem {
+.menu-item {
     display: flex;
     margin: 0;
     padding: 4px 6px;
@@ -31,7 +31,7 @@ html, body {
     cursor: pointer;
 }
 
-.menuitem:hover {
+.menu-item:hover {
     background-color: lightgray;
 }
 
@@ -52,14 +52,23 @@ html, body {
     padding: 52px 16px;
 }
 
-.formitem {
+.form-item {
     padding: 0 0 8px 4px;
+}
+
+.form-input {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .button {
     border: none;
     padding: 4px;
     background-color: darkgray;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
 }
 
