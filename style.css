@@ -2,8 +2,67 @@ html, body {
     width: 100%;
     height: 100%;
     margin: 0;
+    font-family:'Courier New', Courier, monospace;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .canvas {
+    display: block;
+}
+
+.menu {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    width: 320px;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    background-color: darkgray;
+}
+
+.menuitem {
+    display: flex;
+    margin: 0;
+    padding: 4px 6px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.menuitem:hover {
+    background-color: lightgray;
+}
+
+.panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 320px;
+    box-sizing: border-box;
+    display: none;
+    background-color: lightgrey;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    padding: 52px 16px;
+}
+
+.formitem {
+    padding: 0 0 8px 4px;
+}
+
+.button {
+    border: none;
+    padding: 4px;
+    background-color: darkgray;
+    cursor: pointer;
+}
+
+.show-panel {
     display: block;
 }

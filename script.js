@@ -1,9 +1,40 @@
 const $canvas = document.querySelector('.canvas');
 const canvasCtx = $canvas.getContext('2d');
-const tileHalfHeight = 8;
-const tileHalfWidth = 16;
-const mapSideLength = 99;
-const mapHalfLength = parseInt((mapSideLength - 1) / 2);
+const $menu = document.querySelector('.menu');
+const $menuItems = $menu.querySelectorAll('.menuitem');
+const $menuPanels = {};
+for (let option of $menuItems) {
+    $menuPanels[option.dataset.panelName] = document.querySelector(`.${option.dataset.panelName}`);
+}
+$menu.addEventListener('click', ({target}) => {
+    const option = target.closest('.menuitem');
+    if (!option) return;
+    const panel = $menuPanels[option.dataset.panelName];
+    panel.classList.add('show-panel');
+});
+const actions = {
+    new: function({target}) {
+        map = {
+            name: target.querySelector('#name').value,
+            size: parseInt(target.querySelector('#size').value),
+            grid: []
+        }
+        for (let row = 0; row < map.size * 2 + 1; row++) {
+            const mapRow = [];
+            for (let col = 0; col < map.size * 2 + 1; col++) {
+                mapRow.push('img/sample_15.png');
+            }
+            map.grid.push(mapRow);
+        }
+        target.closest('.panel').classList.remove('show-panel');
+    }
+}
+
+let map;
+const tileHeight = 32;
+const tileWidth = 64;
+const tileHalfHeight = tileHeight / 2;
+const tileHalfWidth = tileWidth / 2;
 let screenHeight;
 let screenWidth;
 let cameraX = 0;
@@ -12,24 +43,24 @@ let cameraSpeedX = 0;
 let cameraSpeedY = 0;
 const cameraSpeedLimit = 50;
 const frameLapse = 30;
+main();
 
-const map = [];
-for (let row = 0; row < mapSideLength; row++) {
-    const mapRow = [];
-    for (let col = 0; col < mapSideLength; col++) {
-        mapRow.push('sample.png');
-    }
-    map.push(mapRow);
-}
 const tiles = {};
-const tileSources = ['sample.png'];
+const tileSources = ['img/sample_15.png'];
 const tileLoadMarkers = tileSources.map(tileSource => new Promise(resolve => {
     const tileImg = new Image();
     tileImg.src = tileSource;
     tiles[tileSource] = tileImg;
     tileImg.onload = resolve;
 }));
-Promise.all(tileLoadMarkers).then(main);
+Promise.all(tileLoadMarkers).then(setHandlers);
+
+function setHandlers() {
+    const $forms = document.querySelectorAll('.form');
+    for (let $form of $forms) {
+        $form.addEventListener('submit', actions[$form.dataset.action]);
+    }
+}
 
 function main() {
     window.addEventListener('resize', () => {
@@ -39,7 +70,7 @@ function main() {
     window.addEventListener('keyup', handleKeyup);
     resize();
     let startTime = Date.now();
-    const mainLoop = setInterval(drawScene, frameLapse);
+    const mainLoopInterval = setInterval(drawScene, frameLapse);
 
     function resize() {
         screenHeight = document.documentElement.clientHeight;
@@ -57,29 +88,33 @@ function main() {
         cameraY += cameraSpeedY * deltaTime;
         canvasCtx.fillRect(0, 0, screenWidth, screenHeight);
 
-        const tilesPerRow = Math.ceil(screenWidth / (2 * tileHalfWidth)) + 1;
-        const tilesPerColumn = Math.ceil(screenHeight / (2 * tileHalfHeight)) + 1;
-        const startCellX = parseInt(cameraX / 32);
-        const startCellY = parseInt(cameraY / 16);
-        const startCellShiftX = parseInt(cameraX % 32);
-        const startCellShiftY = parseInt(cameraY % 16);
+        const tilesPerRow = Math.ceil(screenWidth / tileWidth);
+        const tilesPerColumn = Math.ceil(screenHeight / tileHeight);
+        const startCellX = parseInt(cameraX / tileWidth);
+        const startCellY = parseInt(cameraY / tileHeight);
+        const startCellShiftY = parseInt(cameraY % tileHeight);
+        const startCellShiftX = parseInt(cameraX % tileWidth);
         //console.log([startCellX, startCellY, startCellShiftX, startCellShiftY]);
-        for (let col = -1; col <= tilesPerColumn; col++) {
-            for (let row = -1; row <= tilesPerRow; row++) {
-                if (map[startCellX + row + startCellY + col] && map[startCellX + row + startCellY + col][startCellX + row - startCellY - col + mapHalfLength]) {
-                    const tileType = map[startCellX + row + startCellY + col][startCellX + row - startCellY - col + mapHalfLength];
-                    const tileImg = tiles[tileType];
-                    canvasCtx.drawImage(tileImg, row * 2 * tileHalfWidth - startCellShiftX - tileHalfWidth, col * 2 * tileHalfHeight - startCellShiftY - tileHalfHeight);
-                }                
-            }
-            for (let row = -1; row <= tilesPerRow; row++) {
-                if (map[startCellX + row + startCellY + col + 1] && map[startCellX + row + startCellY + col + 1][startCellX + row - startCellY - col + mapHalfLength]) {
-                    const tileType = map[startCellX + row + startCellY + col + 1][startCellX + row - startCellY - col + mapHalfLength];
-                    const tileImg = tiles[tileType];
-                    canvasCtx.drawImage(tileImg, row * 2 * tileHalfWidth - startCellShiftX, col * 2 * tileHalfHeight - startCellShiftY);
+
+        if (map) {
+            const {size, grid} = map;
+            for (let col = -1; col <= tilesPerColumn; col++) {
+                for (let row = -1; row <= tilesPerRow; row++) {
+                    if (grid[startCellX + row + startCellY + col] && grid[startCellX + row + startCellY + col][startCellX + row - startCellY - col + size]) {
+                        const tileType = grid[startCellX + row + startCellY + col][startCellX + row - startCellY - col + size];
+                        const tileImg = tiles[tileType];
+                        canvasCtx.drawImage(tileImg, row * tileWidth - startCellShiftX - tileHalfWidth, col * tileHeight - startCellShiftY - tileHalfHeight);
+                    }                
+                }
+                for (let row = -1; row <= tilesPerRow; row++) {
+                    if (grid[startCellX + row + startCellY + col + 1] && grid[startCellX + row + startCellY + col + 1][startCellX + row - startCellY - col + size]) {
+                        const tileType = grid[startCellX + row + startCellY + col + 1][startCellX + row - startCellY - col + size];
+                        const tileImg = tiles[tileType];
+                        canvasCtx.drawImage(tileImg, row * tileWidth - startCellShiftX, col * tileHeight - startCellShiftY);
+                    }
                 }
             }
-        }
+        }        
     }
 
     function handleKeydown({key}) {

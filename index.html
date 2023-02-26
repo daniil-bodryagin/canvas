@@ -10,5 +10,15 @@
 </head>
 <body>
     <canvas class="canvas"></canvas>
+    <ul class="menu">
+        <li class="menuitem" data-panel-name="new">New</li>
+    </ul>
+    <div class="panel new">
+        <form action="#" class="form" data-action="new">
+            <label class="formitem" for="name">Name <input type="text" id="name" value="default"></label>
+            <label class="formitem" for="size">Size <input type="number" id="size" min="10" value="50"></label>
+            <input type="submit" class="button" value="Create">
+        </form>
+    </div>
 </body>
 </html>
