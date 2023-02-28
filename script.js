@@ -7,32 +7,35 @@ for (let option of $menuItems) {
     $menuPanels.push(document.querySelector(`.${option.dataset.panelName}`));
 }
 $menu.addEventListener('click', ({target}) => {
-    const option = target.closest('.menu-item');
-    if (!option) return;
+    const $option = target.closest('.menu-item');
+    if (!$option) return;
     for (let $panel of $menuPanels) {
-        if ($panel.classList.contains(option.dataset.panelName)) {
+        if ($panel.classList.contains($option.dataset.panelName)) {
             $panel.classList.toggle('show-panel');
         } else {
             $panel.classList.remove('show-panel');
         }
     }
-    if (menuActions[option.dataset.panelName]) menuActions[option.dataset.panelName]();
+    if (menuActions[$option.dataset.panelName]) menuActions[$option.dataset.panelName]($option.dataset.panelName);
 });
 
+function createMapList(panelName) {
+    fetch('http://127.0.0.1:8000')
+        .then(response => response.json())
+        .then(mapList => {
+            const $mapList = document.querySelector(`.${panelName} .map-list`);
+            $mapList.innerHTML = '';
+            for (let {name} of mapList) {
+                const nameSplitted = name.split('.')[0];
+                $mapList.insertAdjacentHTML('beforeend', `
+                    <input type="radio" name="map-radio" id="${nameSplitted}" class="map-radio"><label for="${nameSplitted}" class="map-label">${nameSplitted}</label>`);
+            }
+        });
+}
+
 const menuActions = {
-    open: function() {
-        fetch('http://127.0.0.1:8000')
-            .then(response => response.json())
-            .then(mapList => {
-                const $mapList = document.querySelector('.map-list');
-                $mapList.innerHTML = '';
-                for (let {name} of mapList) {
-                    const nameSplitted = name.split('.')[0];
-                    $mapList.insertAdjacentHTML('beforeend', `
-                        <input type="radio" name="map-radio" id="${nameSplitted}" class="map-radio"><label for="${nameSplitted}" class="map-label">${nameSplitted}</label>`);
-                }
-            });
-    }
+    open: createMapList,
+    delete: createMapList
 }
 
 const actions = {
@@ -50,7 +53,6 @@ const actions = {
             map.grid.push(mapRow);
         }
         document.querySelector('#name-save').value = map.name;
-        target.closest('.panel').classList.remove('show-panel');
     },
     open: function({target}) {
         const $selectedMap = target.querySelector('input:checked');
@@ -59,15 +61,14 @@ const actions = {
             .then(response => response.json())
             .then(result => map = JSON.parse(result));
         }
-        target.closest('.panel').classList.remove('show-panel');
     },
     save: function({target}) {
         if (map) {
             const name = target.querySelector('#name-save').value;
             const {...mapCopy} = {...map};
             mapCopy.name = name;
-            fetch('http://127.0.0.1:8000', {
-                method: 'POST',
+            fetch(`http://127.0.0.1:8000/${mapCopy.name}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
                 },
@@ -76,7 +77,19 @@ const actions = {
                 return response.json()
             }).then(result => alert(result.message))
         }
-        target.closest('.panel').classList.remove('show-panel');
+    },
+    delete: function({target}) {
+        const $selectedMap = target.querySelector('input:checked');
+        const $selectedMapLabel = target.querySelector('input:checked + label');
+        if ($selectedMap) {
+            fetch(`http://127.0.0.1:8000/${$selectedMap.id}`, {
+                method: 'DELETE'
+            }).then(response => {
+                return response.json()
+            }).then(result => alert(result.message))
+        }
+        $selectedMap.remove();
+        $selectedMapLabel.remove();
     }
 }
 
@@ -112,6 +125,12 @@ function setHandlers() {
             event.preventDefault();
             actions[$form.dataset.action](event);
         });
+    }
+    const $closeButtons = document.querySelectorAll('.close-button');
+    for (let $button of $closeButtons) {
+        $button.addEventListener('click', function({target}) {
+            target.closest('.panel').classList.remove('show-panel');
+        })
     }
 }
 

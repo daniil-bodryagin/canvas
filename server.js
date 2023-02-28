@@ -6,7 +6,7 @@ const server = http.createServer(function(request, response) {
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*', 
-    'Access-Control-Allow-Methods': 'OPTIONS, POST, GET', 
+    'Access-Control-Allow-Methods': 'OPTIONS, PUT, DELETE, GET', 
     'Access-Control-Max-Age': 2592000, 
     'Access-Control-Allow-Headers': '*'
   };
@@ -15,8 +15,8 @@ const server = http.createServer(function(request, response) {
     response.writeHead(204, headers);
     response.end();
     return;
-  } else if (request.method == 'POST') {
-    console.log('POST');
+  } else if (request.method == 'PUT') {
+    console.log('PUT');
     let body = '';
     request.on('data', function(data) {
       body += data;
@@ -24,18 +24,17 @@ const server = http.createServer(function(request, response) {
     request.on('end', function() {
       console.log('Body: ');// + body);
       response.writeHead(200, headers);
-      const map = JSON.parse(body);
+      const name = request.url.split('/');
       fs.writeFileSync(
-        `../maps/${map.name}.json`,
-        `${JSON.stringify(map)}`,
+        `../maps/${name[name.length - 1]}.json`,
+        body,
         { encoding: "utf-8" }
       )
       response.end(JSON.stringify({message:'Map is saved'}));
     });
     return;
-  } else {
+  } else if (request.method == 'GET'){
     console.log('GET', request.url);
-    const contentType = 'application/json';
     if (request.url == '/') {
       const mapList = fs.readdirSync('../maps', {withFileTypes: true});
       console.log(mapList);
@@ -48,7 +47,14 @@ const server = http.createServer(function(request, response) {
       const map = fs.readFileSync(`../maps/${request.url}.json`, { encoding: "utf-8" });
       response.writeHead(200, headers);
       response.end(JSON.stringify(map));
-    }    
+    }
+    return;
+  } else {
+    console.log('DELETE');
+    response.writeHead(200, headers);
+    const name = request.url.split('/');
+    fs.rmSync(`../maps/${name[name.length - 1]}.json`);
+    response.end(JSON.stringify({message:'Map is deleted'}));
   }
   return;
 });

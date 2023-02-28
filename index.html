@@ -14,13 +14,14 @@
         <li class="menu-item" data-panel-name="new">New</li>
         <li class="menu-item" data-panel-name="open">Open</li>
         <li class="menu-item" data-panel-name="save">Save</li>
-        <!-- <li class="menu-item" data-panel-name="delete">Save</li> -->
+        <li class="menu-item" data-panel-name="delete">Delete</li>
     </ul>
     <div class="panel new">
         <form action="#" class="form" data-action="new">
             <label class="form-item" for="name">Name <input type="text" id="name" class="form-input" value="default"></label>
             <label class="form-item" for="size">Size <input type="number" id="size" class="form-input" min="10" value="50"></label>
             <input type="submit" class="button" value="Create">
+            <input type="button" class="button close-button" value="Close">
         </form>
     </div>
     <div class="panel open">
@@ -28,19 +29,23 @@
             <label class="form-item" for="name-open">Open</label>
             <div class="map-list"></div>
             <input type="submit" class="button" value="Open">
+            <input type="button" class="button close-button" value="Close">
         </form>
     </div>
     <div class="panel save">
         <form action="#" class="form" data-action="save">
             <label class="form-item" for="name-save">Name <input type="text" id="name-save" class="form-input"></label>
             <input type="submit" class="button" value="Save">
+            <input type="button" class="button close-button" value="Close">
         </form>
     </div>
-    <!-- <div class="panel delete">
+    <div class="panel delete">
         <form action="#" class="form" data-action="delete">
             <label class="form-item" for="name-delete">Delete</label>
+            <div class="map-list"></div>
             <input type="submit" class="button" value="delete">
+            <input type="button" class="button close-button" value="Close">
         </form>
-    </div> -->
+    </div>
 </body>
 </html>
