@@ -2,13 +2,18 @@ const $canvas = document.querySelector('.canvas');
 const canvasCtx = $canvas.getContext('2d');
 const $menu = document.querySelector('.menu');
 const $menuItems = $menu.querySelectorAll('.menu-item');
-const $menuPanels = [];
-for (let option of $menuItems) {
-    $menuPanels.push(document.querySelector(`.${option.dataset.panelName}`));
-}
+const $menuPanels = document.querySelectorAll('.panel');
+
 $menu.addEventListener('click', ({target}) => {
     const $option = target.closest('.menu-item');
     if (!$option) return;
+    for (let $menuItem of $menuItems) {
+        if ($option == $menuItem) {
+            $menuItem.classList.toggle('menu-item-selected');
+        } else {
+            $menuItem.classList.remove('menu-item-selected');
+        }
+    }
     for (let $panel of $menuPanels) {
         if ($panel.classList.contains($option.dataset.panelName)) {
             $panel.classList.toggle('show-panel');
