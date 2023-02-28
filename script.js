@@ -16,7 +16,25 @@ $menu.addEventListener('click', ({target}) => {
             $panel.classList.remove('show-panel');
         }
     }
+    if (menuActions[option.dataset.panelName]) menuActions[option.dataset.panelName]();
 });
+
+const menuActions = {
+    open: function() {
+        fetch('http://127.0.0.1:8000')
+            .then(response => response.json())
+            .then(mapList => {
+                const $mapList = document.querySelector('.map-list');
+                $mapList.innerHTML = '';
+                for (let {name} of mapList) {
+                    const nameSplitted = name.split('.')[0];
+                    $mapList.insertAdjacentHTML('beforeend', `
+                        <input type="radio" name="map-radio" id="${nameSplitted}" class="map-radio"><label for="${nameSplitted}" class="map-label">${nameSplitted}</label>`);
+                }
+            });
+    }
+}
+
 const actions = {
     new: function({target}) {
         map = {
@@ -32,6 +50,15 @@ const actions = {
             map.grid.push(mapRow);
         }
         document.querySelector('#name-save').value = map.name;
+        target.closest('.panel').classList.remove('show-panel');
+    },
+    open: function({target}) {
+        const $selectedMap = target.querySelector('input:checked');
+        if ($selectedMap) {
+            fetch(`http://127.0.0.1:8000/${$selectedMap.id}`)
+            .then(response => response.json())
+            .then(result => map = JSON.parse(result));
+        }
         target.closest('.panel').classList.remove('show-panel');
     },
     save: function({target}) {

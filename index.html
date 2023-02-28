@@ -12,7 +12,9 @@
     <canvas class="canvas"></canvas>
     <ul class="menu">
         <li class="menu-item" data-panel-name="new">New</li>
+        <li class="menu-item" data-panel-name="open">Open</li>
         <li class="menu-item" data-panel-name="save">Save</li>
+        <!-- <li class="menu-item" data-panel-name="delete">Save</li> -->
     </ul>
     <div class="panel new">
         <form action="#" class="form" data-action="new">
@@ -21,11 +23,24 @@
             <input type="submit" class="button" value="Create">
         </form>
     </div>
+    <div class="panel open">
+        <form action="#" class="form" data-action="open">
+            <label class="form-item" for="name-open">Open</label>
+            <div class="map-list"></div>
+            <input type="submit" class="button" value="Open">
+        </form>
+    </div>
     <div class="panel save">
         <form action="#" class="form" data-action="save">
-            <label class="form-item" for="name">Name <input type="text" id="name-save" class="form-input"></label>
+            <label class="form-item" for="name-save">Name <input type="text" id="name-save" class="form-input"></label>
             <input type="submit" class="button" value="Save">
         </form>
     </div>
+    <!-- <div class="panel delete">
+        <form action="#" class="form" data-action="delete">
+            <label class="form-item" for="name-delete">Delete</label>
+            <input type="submit" class="button" value="delete">
+        </form>
+    </div> -->
 </body>
 </html>
