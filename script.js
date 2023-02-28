@@ -35,6 +35,9 @@ function createMapList(panelName) {
 
 const menuActions = {
     open: createMapList,
+    save: function() {  
+        if (map) document.querySelector('#name-save').value = map.name;
+    },
     delete: createMapList
 }
 
@@ -52,7 +55,6 @@ const actions = {
             }
             map.grid.push(mapRow);
         }
-        document.querySelector('#name-save').value = map.name;
     },
     open: function({target}) {
         const $selectedMap = target.querySelector('input:checked');
