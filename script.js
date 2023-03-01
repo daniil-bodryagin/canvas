@@ -5,7 +5,13 @@ const $menuItems = $menu.querySelectorAll('.menu-item');
 const $menuPanels = document.querySelectorAll('.panel');
 const $terrainTiles = [];
 const terrainTiles = {};
-let selectedTile;
+let cursorFunction;
+
+function setCursorFunction(callback) {
+    $canvas.removeEventListener('mousemove', cursorFunction);
+    cursorFunction = callback;
+    $canvas.addEventListener('mousemove', cursorFunction);
+}
 
 $menu.addEventListener('click', ({target}) => {
     const $option = target.closest('.menu-item');
@@ -24,7 +30,7 @@ $menu.addEventListener('click', ({target}) => {
             $panel.classList.remove('show-panel');
         }
     }
-    if (menuActions[$option.dataset.panelName]) menuActions[$option.dataset.panelName]($option.dataset.panelName);
+    if (menuActions[$option.dataset.panelName] && $option.classList.contains('menu-item-selected')) menuActions[$option.dataset.panelName]($option.dataset.panelName);
 });
 
 function createMapList(panelName) {
@@ -41,12 +47,21 @@ function createMapList(panelName) {
         }).catch(error => console.log(`Server doesn't respond`));
 }
 
+
+
 const menuActions = {
     open: createMapList,
     save: function() {  
         if (map) document.querySelector('#name-save').value = map.name;
     },
     delete: createMapList
+}
+
+const editFunctions = {
+    terrain: function({clientX, clientY}) {
+        console.log(clientX, clientY);
+    },
+    stop: null
 }
 
 const actions = {
@@ -146,6 +161,16 @@ function setHandlers() {
             event.preventDefault();
             actions[$form.dataset.action](event);
         });
+    }
+    const $editButtons = document.querySelectorAll('.edit-button');
+    for (let $editButton of $editButtons) {
+        $editButton.addEventListener('click', function({target}) {
+            setCursorFunction(editFunctions[target.dataset.action]);
+            for (let $editButton of $editButtons) {
+                if ($editButton == target && $editButton.value != 'Stop') $editButton.classList.toggle('edit-button-selected');
+                else $editButton.classList.remove('edit-button-selected');
+            }
+        })
     }
     const $closeButtons = document.querySelectorAll('.close-button');
     for (let $button of $closeButtons) {

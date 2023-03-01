@@ -135,3 +135,7 @@ html, body {
 .tile-icon {
     width: 100%;
 }
+
+.edit-button-selected {
+    background-color: gainsboro;
+}
