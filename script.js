@@ -3,6 +3,9 @@ const canvasCtx = $canvas.getContext('2d');
 const $menu = document.querySelector('.menu');
 const $menuItems = $menu.querySelectorAll('.menu-item');
 const $menuPanels = document.querySelectorAll('.panel');
+const $terrainTiles = [];
+const terrainTiles = {};
+let selectedTile;
 
 $menu.addEventListener('click', ({target}) => {
     const $option = target.closest('.menu-item');
@@ -35,7 +38,7 @@ function createMapList(panelName) {
                 $mapList.insertAdjacentHTML('beforeend', `
                     <input type="radio" name="map-radio" id="${nameSplitted}" class="map-radio"><label for="${nameSplitted}" class="map-label">${nameSplitted}</label>`);
             }
-        });
+        }).catch(error => console.log(`Server doesn't respond`));
 }
 
 const menuActions = {
@@ -56,7 +59,7 @@ const actions = {
         for (let row = 0; row < map.size * 2 + 1; row++) {
             const mapRow = [];
             for (let col = 0; col < map.size * 2 + 1; col++) {
-                mapRow.push('img/sample_15.png');
+                mapRow.push('img/terrain/sample_15.png');
             }
             map.grid.push(mapRow);
         }
@@ -66,7 +69,8 @@ const actions = {
         if ($selectedMap) {
             fetch(`http://127.0.0.1:8000/${$selectedMap.id}`)
             .then(response => response.json())
-            .then(result => map = JSON.parse(result));
+            .then(result => map = JSON.parse(result))
+            .catch(error => console.log(`Server doesn't respond`));
         }
     },
     save: function({target}) {
@@ -82,7 +86,7 @@ const actions = {
                 body: JSON.stringify(mapCopy)
             }).then(response => {
                 return response.json()
-            }).then(result => alert(result.message))
+            }).then(result => alert(result.message)).catch(error => console.log(`Server doesn't respond`));
         }
     },
     delete: function({target}) {
@@ -93,7 +97,7 @@ const actions = {
                 method: 'DELETE'
             }).then(response => {
                 return response.json()
-            }).then(result => alert(result.message))
+            }).then(result => alert(result.message)).catch(error => console.log(`Server doesn't respond`))
         }
         $selectedMap.remove();
         $selectedMapLabel.remove();
@@ -115,15 +119,25 @@ const cameraSpeedLimit = 50;
 const frameLapse = 30;
 main();
 
-const tiles = {};
-const tileSources = ['img/sample_15.png'];
-const tileLoadMarkers = tileSources.map(tileSource => new Promise(resolve => {
-    const tileImg = new Image();
-    tileImg.src = tileSource;
-    tiles[tileSource] = tileImg;
-    tileImg.onload = resolve;
-}));
-Promise.all(tileLoadMarkers).then(setHandlers);
+
+fetch('http://127.0.0.1:8000/img/terrain')
+    .then(response => response.json())
+    .then(terrainList => {
+        const tileSources = terrainList.map(({name}) => `img/terrain/${name}`);
+        const $terrainList = document.querySelector('.tile-list');
+        const tileLoadPromises = tileSources.map(tileSource => new Promise(resolve => {
+            $terrainList.insertAdjacentHTML('beforeend', `
+                <input type="radio" name="tile-radio" id="${tileSource}" class="tile-radio"><label for="${tileSource}" class="tile-label"><img src="${tileSource}" class="tile-icon"></label>
+            `);
+
+            const tileImg = new Image();
+            tileImg.src = tileSource;
+            terrainTiles[tileSource] = tileImg;
+            tileImg.onload = resolve;
+        }));
+        $terrainList.querySelector('input:first-child').setAttribute('checked','checked');
+        Promise.all(tileLoadPromises).then(setHandlers);
+    });
 
 function setHandlers() {
     const $forms = document.querySelectorAll('.form');
@@ -181,14 +195,14 @@ function main() {
                 for (let row = -1; row <= tilesPerRow; row++) {
                     if (grid[startCellX + row + startCellY + col] && grid[startCellX + row + startCellY + col][startCellX + row - startCellY - col + size]) {
                         const tileType = grid[startCellX + row + startCellY + col][startCellX + row - startCellY - col + size];
-                        const tileImg = tiles[tileType];
+                        const tileImg = terrainTiles[tileType];
                         canvasCtx.drawImage(tileImg, row * tileWidth - startCellShiftX - tileHalfWidth, col * tileHeight - startCellShiftY - tileHalfHeight);
                     }                
                 }
                 for (let row = -1; row <= tilesPerRow; row++) {
                     if (grid[startCellX + row + startCellY + col + 1] && grid[startCellX + row + startCellY + col + 1][startCellX + row - startCellY - col + size]) {
                         const tileType = grid[startCellX + row + startCellY + col + 1][startCellX + row - startCellY - col + size];
-                        const tileImg = tiles[tileType];
+                        const tileImg = terrainTiles[tileType];
                         canvasCtx.drawImage(tileImg, row * tileWidth - startCellShiftX, col * tileHeight - startCellShiftY);
                     }
                 }

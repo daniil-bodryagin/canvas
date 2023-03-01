@@ -41,8 +41,17 @@ const server = http.createServer(function(request, response) {
       mapList.sort(
         (a, b) => a.name.localeCompare(b.name, "en")
       );
+      console.log(mapList);
       response.writeHead(200, headers);
       response.end(JSON.stringify(mapList));
+    } else if (request.url == '/img/terrain') {
+      const terrainList = fs.readdirSync('./img/terrain', {withFileTypes: true});
+      console.log(terrainList);
+      terrainList.sort(
+        (a, b) => a.name.localeCompare(b.name, "en")
+      );
+      response.writeHead(200, headers);
+      response.end(JSON.stringify(terrainList));
     } else {
       const map = fs.readFileSync(`../maps/${request.url}.json`, { encoding: "utf-8" });
       response.writeHead(200, headers);
