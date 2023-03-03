@@ -57,11 +57,24 @@ const menuActions = {
     delete: createMapList
 }
 
-const editFunctions = {
+const cursorFunctions = {
     terrain: function({clientX, clientY}) {
         console.log(clientX, clientY);
     },
     stop: null
+}
+
+const editActions = {
+    terrain: function() {
+        const $terrainList = document.querySelector('.tile-list');
+        const terrainSources = Object.keys(terrainTiles);
+        for (let terrainSource of terrainSources) {
+            $terrainList.insertAdjacentHTML('beforeend', `
+            <input type="radio" name="tile-radio" id="${terrainSource}" class="tile-radio"><label for="${terrainSource}" class="tile-label"><img src="${terrainSource}" class="tile-icon"></label>
+        `);
+        }
+        $terrainList.querySelector('input:first-child').setAttribute('checked','checked');
+    }
 }
 
 const actions = {
@@ -139,18 +152,12 @@ fetch('http://127.0.0.1:8000/img/terrain')
     .then(response => response.json())
     .then(terrainList => {
         const tileSources = terrainList.map(({name}) => `img/terrain/${name}`);
-        const $terrainList = document.querySelector('.tile-list');
         const tileLoadPromises = tileSources.map(tileSource => new Promise(resolve => {
-            $terrainList.insertAdjacentHTML('beforeend', `
-                <input type="radio" name="tile-radio" id="${tileSource}" class="tile-radio"><label for="${tileSource}" class="tile-label"><img src="${tileSource}" class="tile-icon"></label>
-            `);
-
             const tileImg = new Image();
             tileImg.src = tileSource;
             terrainTiles[tileSource] = tileImg;
             tileImg.onload = resolve;
         }));
-        $terrainList.querySelector('input:first-child').setAttribute('checked','checked');
         Promise.all(tileLoadPromises).then(setHandlers);
     });
 
@@ -165,7 +172,8 @@ function setHandlers() {
     const $editButtons = document.querySelectorAll('.edit-button');
     for (let $editButton of $editButtons) {
         $editButton.addEventListener('click', function({target}) {
-            setCursorFunction(editFunctions[target.dataset.action]);
+            setCursorFunction(cursorFunctions[target.dataset.action]);
+            editActions[target.dataset.action]();
             for (let $editButton of $editButtons) {
                 if ($editButton == target && $editButton.value != 'Stop') $editButton.classList.toggle('edit-button-selected');
                 else $editButton.classList.remove('edit-button-selected');
