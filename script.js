@@ -13,25 +13,52 @@ function setCursorFunction(callback) {
     $canvas.addEventListener('mousemove', cursorFunction);
 }
 
-$menu.addEventListener('click', ({target}) => {
-    const $option = target.closest('.menu-item');
-    if (!$option) return;
-    for (let $menuItem of $menuItems) {
-        if ($option == $menuItem) {
-            $menuItem.classList.toggle('menu-item-selected');
-        } else {
-            $menuItem.classList.remove('menu-item-selected');
-        }
+function setMenuHandlers() {
+    $menu.addEventListener('click', ({target}) => {
+        const $targetMenuElement = target.closest('[data-type]');
+        if (!$targetMenuElement) return;
+        switch ($targetMenuElement.dataset.type) {
+            case 'menu-item':
+                const targetPanelName = $targetMenuElement.dataset.panelName;
+                for (let $menuItem of $menuItems) {
+                    if ($targetMenuElement == $menuItem) {
+                        $menuItem.classList.toggle('menu-item-selected');
+                    } else {
+                        $menuItem.classList.remove('menu-item-selected');
+                    }
+                }
+                for (let $panel of $menuPanels) {
+                    if ($panel.classList.contains(`${targetPanelName}`)) {
+                        $panel.classList.toggle('show-panel');
+                    } else {
+                        $panel.classList.remove('show-panel');
+                    }
+                }
+                if (menuActions[targetPanelName] && $targetMenuElement.classList.contains('menu-item-selected')) menuActions[targetPanelName](targetPanelName);
+                break;
+            case 'menu-edit':
+                const $editButtons = document.querySelectorAll('.edit-button');
+                setCursorFunction(cursorFunctions[$targetMenuElement.dataset.action]);
+                if (editActions[$targetMenuElement.dataset.action]) editActions[$targetMenuElement.dataset.action]();
+                for (let $editButton of $editButtons) {
+                    if ($editButton == $targetMenuElement && $editButton.value != 'Stop') $editButton.classList.toggle('edit-button-selected');
+                    else $editButton.classList.remove('edit-button-selected');
+                }
+                break;
+            case 'menu-close':
+                $targetMenuElement.closest('.panel').classList.remove('show-panel');
+                break;
+        }    
+    });
+    const $menuForms = $menu.querySelectorAll('.form');
+    for (let $menuForm of $menuForms) {
+        $menuForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            actions[$menuForm.dataset.action](event);
+        });
     }
-    for (let $panel of $menuPanels) {
-        if ($panel.classList.contains($option.dataset.panelName)) {
-            $panel.classList.toggle('show-panel');
-        } else {
-            $panel.classList.remove('show-panel');
-        }
-    }
-    if (menuActions[$option.dataset.panelName] && $option.classList.contains('menu-item-selected')) menuActions[$option.dataset.panelName]($option.dataset.panelName);
-});
+}
+
 
 function createMapList(panelName) {
     fetch('http://127.0.0.1:8000')
@@ -42,12 +69,11 @@ function createMapList(panelName) {
             for (let {name} of mapList) {
                 const nameSplitted = name.split('.')[0];
                 $mapList.insertAdjacentHTML('beforeend', `
-                    <input type="radio" name="map-radio" id="${nameSplitted}" class="map-radio"><label for="${nameSplitted}" class="map-label">${nameSplitted}</label>`);
+                    <input type="radio" name="map-radio" id="${panelName}-${nameSplitted}" class="map-radio" data-name="${nameSplitted}">
+                    <label for="${panelName}-${nameSplitted}" class="map-label">${nameSplitted}</label>`);
             }
         }).catch(error => console.log(`Server doesn't respond`));
 }
-
-
 
 const menuActions = {
     open: createMapList,
@@ -70,7 +96,8 @@ const editActions = {
         const terrainSources = Object.keys(terrainTiles);
         for (let terrainSource of terrainSources) {
             $terrainList.insertAdjacentHTML('beforeend', `
-            <input type="radio" name="tile-radio" id="${terrainSource}" class="tile-radio"><label for="${terrainSource}" class="tile-label"><img src="${terrainSource}" class="tile-icon"></label>
+            <input type="radio" name="tile-radio" id="${terrainSource}" class="tile-radio">
+            <label for="${terrainSource}" class="tile-label"><img src="${terrainSource}" class="tile-icon"></label>
         `);
         }
         $terrainList.querySelector('input:first-child').setAttribute('checked','checked');
@@ -95,7 +122,7 @@ const actions = {
     open: function({target}) {
         const $selectedMap = target.querySelector('input:checked');
         if ($selectedMap) {
-            fetch(`http://127.0.0.1:8000/${$selectedMap.id}`)
+            fetch(`http://127.0.0.1:8000/${$selectedMap.dataset.name}`)
             .then(response => response.json())
             .then(result => map = JSON.parse(result))
             .catch(error => console.log(`Server doesn't respond`));
@@ -121,7 +148,7 @@ const actions = {
         const $selectedMap = target.querySelector('input:checked');
         const $selectedMapLabel = target.querySelector('input:checked + label');
         if ($selectedMap) {
-            fetch(`http://127.0.0.1:8000/${$selectedMap.id}`, {
+            fetch(`http://127.0.0.1:8000/${$selectedMap.dataset.name}`, {
                 method: 'DELETE'
             }).then(response => {
                 return response.json()
@@ -158,35 +185,8 @@ fetch('http://127.0.0.1:8000/img/terrain')
             terrainTiles[tileSource] = tileImg;
             tileImg.onload = resolve;
         }));
-        Promise.all(tileLoadPromises).then(setHandlers);
+        Promise.all(tileLoadPromises).then(setMenuHandlers);
     });
-
-function setHandlers() {
-    const $forms = document.querySelectorAll('.form');
-    for (let $form of $forms) {
-        $form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            actions[$form.dataset.action](event);
-        });
-    }
-    const $editButtons = document.querySelectorAll('.edit-button');
-    for (let $editButton of $editButtons) {
-        $editButton.addEventListener('click', function({target}) {
-            setCursorFunction(cursorFunctions[target.dataset.action]);
-            editActions[target.dataset.action]();
-            for (let $editButton of $editButtons) {
-                if ($editButton == target && $editButton.value != 'Stop') $editButton.classList.toggle('edit-button-selected');
-                else $editButton.classList.remove('edit-button-selected');
-            }
-        })
-    }
-    const $closeButtons = document.querySelectorAll('.close-button');
-    for (let $button of $closeButtons) {
-        $button.addEventListener('click', function({target}) {
-            target.closest('.panel').classList.remove('show-panel');
-        })
-    }
-}
 
 function main() {
     window.addEventListener('resize', () => {

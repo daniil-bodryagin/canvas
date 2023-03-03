@@ -15,8 +15,10 @@ html, body {
     position: absolute;
     top: 0;
     right: 0;
-    z-index: 1;
     width: 296px;
+}
+
+.menu-options {
     display: flex;
     margin: 0;
     padding: 0;
@@ -24,7 +26,6 @@ html, body {
 }
 
 .menu-item {
-    display: flex;
     margin: 0;
     padding: 4px 6px;
     list-style: none;
@@ -37,9 +38,6 @@ html, body {
 }
 
 .panel {
-    position: absolute;
-    top: 0;
-    right: 0;
     width: 296px;
     box-sizing: border-box;
     display: none;
@@ -50,7 +48,7 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: start;
-    padding: 52px 16px 16px;
+    padding: 24px 16px 16px;
 }
 
 .form-item {
