@@ -212,31 +212,40 @@ function main() {
         startTime = newTime;
         cameraX += cameraSpeedX * deltaTime;
         cameraY += cameraSpeedY * deltaTime;
+        //console.log(cameraX, cameraY);
         canvasCtx.fillRect(0, 0, screenWidth, screenHeight);
 
-        const tilesPerRow = Math.ceil(screenWidth / tileWidth);
-        const tilesPerColumn = Math.ceil(screenHeight / tileHeight);
-        const startCellX = parseInt(cameraX / tileWidth);
-        const startCellY = parseInt(cameraY / tileHeight);
-        const startCellShiftY = parseInt(cameraY % tileHeight);
-        const startCellShiftX = parseInt(cameraX % tileWidth);
+        const tilesPerRow = Math.floor(screenWidth / tileWidth);
+        const tilesPerColumn = Math.floor(screenHeight / tileHeight);
+        const startCellX = Math.floor(cameraX / tileWidth);
+        const startCellY = Math.floor(cameraY / tileHeight);
+        const startCellShiftX = cameraX - startCellX * tileWidth;
+        const startCellShiftY = cameraY - startCellY * tileHeight;
         //console.log([startCellX, startCellY, startCellShiftX, startCellShiftY]);
 
         if (map) {
             const {size, grid} = map;
-            for (let col = -1; col <= tilesPerColumn; col++) {
-                for (let row = -1; row <= tilesPerRow; row++) {
-                    if (grid[startCellX + row + startCellY + col] && grid[startCellX + row + startCellY + col][startCellX + row - startCellY - col + size]) {
-                        const tileType = grid[startCellX + row + startCellY + col][startCellX + row - startCellY - col + size];
+            for (let row = 0; row < tilesPerColumn + 3; row++) {
+                for (let col = 0; col < tilesPerRow + 3; col++) {
+                    const currentCellRow = startCellX + startCellY + col + row;
+                    const currentCellCol = startCellX - startCellY + size + col - row;
+                    if (currentCellRow < grid.length && currentCellRow >= 0 && currentCellCol < grid[0].length && currentCellCol >= 0) {
+                        const tileType = grid[currentCellRow][currentCellCol];
                         const tileImg = terrainTiles[tileType];
-                        canvasCtx.drawImage(tileImg, row * tileWidth - startCellShiftX - tileHalfWidth, col * tileHeight - startCellShiftY - tileHalfHeight);
-                    }                
+                        const imageX = col * tileWidth - tileHalfWidth - startCellShiftX;
+                        const imageY = row * tileHeight - tileHalfHeight - startCellShiftY;
+                        canvasCtx.drawImage(tileImg, imageX, imageY);
+                    }                    
                 }
-                for (let row = -1; row <= tilesPerRow; row++) {
-                    if (grid[startCellX + row + startCellY + col + 1] && grid[startCellX + row + startCellY + col + 1][startCellX + row - startCellY - col + size]) {
-                        const tileType = grid[startCellX + row + startCellY + col + 1][startCellX + row - startCellY - col + size];
+                for (let col = 0; col < tilesPerRow + 2; col++) {
+                    const currentCellRow = startCellX + startCellY + col + 1 + row;
+                    const currentCellCol = startCellX - startCellY + size + col - row;
+                    if (currentCellRow < grid.length && currentCellRow >= 0 && currentCellCol < grid[0].length && currentCellCol >= 0) {
+                        const tileType = grid[currentCellRow][currentCellCol];
                         const tileImg = terrainTiles[tileType];
-                        canvasCtx.drawImage(tileImg, row * tileWidth - startCellShiftX, col * tileHeight - startCellShiftY);
+                        const imageX = col * tileWidth - startCellShiftX;
+                        const imageY = row * tileHeight - startCellShiftY;
+                        canvasCtx.drawImage(tileImg, imageX, imageY);
                     }
                 }
             }
@@ -246,16 +255,16 @@ function main() {
     function handleKeydown({key}) {
         switch (key) {
             case 'ArrowUp': 
-                if (cameraSpeedY >= 0) cameraSpeedY = cameraSpeedLimit;
+                if (cameraSpeedY <= 0) cameraSpeedY = - cameraSpeedLimit;
                 break;
             case 'ArrowDown':
-                if (cameraSpeedY <= 0) cameraSpeedY = -cameraSpeedLimit;
+                if (cameraSpeedY >= 0) cameraSpeedY = cameraSpeedLimit;
                 break;
             case 'ArrowLeft':
-                if (cameraSpeedX >= 0) cameraSpeedX = cameraSpeedLimit;
+                if (cameraSpeedX <= 0) cameraSpeedX = - cameraSpeedLimit;
                 break;
             case 'ArrowRight':
-                if (cameraSpeedX <= 0) cameraSpeedX = -cameraSpeedLimit;
+                if (cameraSpeedX >= 0) cameraSpeedX = cameraSpeedLimit;
                 break;
         }
     }
@@ -263,16 +272,16 @@ function main() {
     function handleKeyup({key}) {
         switch (key) {
             case 'ArrowUp': 
-                if (cameraSpeedY >= 0) cameraSpeedY = 0;
-                break;
-            case 'ArrowDown':
                 if (cameraSpeedY <= 0) cameraSpeedY = 0;
                 break;
+            case 'ArrowDown':
+                if (cameraSpeedY >= 0) cameraSpeedY = 0;
+                break;
             case 'ArrowLeft':
-                if (cameraSpeedX >= 0) cameraSpeedX = 0;
+                if (cameraSpeedX <= 0) cameraSpeedX = 0;
                 break;
             case 'ArrowRight':
-                if (cameraSpeedX <= 0) cameraSpeedX = 0;
+                if (cameraSpeedX >= 0) cameraSpeedX = 0;
                 break;
         }
     }
