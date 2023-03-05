@@ -8,17 +8,26 @@ const $terrainTiles = [];
 const terrainTiles = {};
 const cursorFunctions = {
     move: null,
-    click: null
+    mouseDown: null,
+    mouseUp: null,
+    mouseOut: null
 };
 let cursorImageType;
+let tileForReplace;
 
-function setCursorFunctions(moveCallback, clickCallback) {
+function setCursorFunctions(moveCallback, mouseDownCallback, mouseUpCallback, mouseOutCallback) {
     $canvas.removeEventListener('mousemove', cursorFunctions.move);
     cursorFunctions.move = moveCallback;
     $canvas.addEventListener('mousemove', cursorFunctions.move);
-    $canvas.removeEventListener('click', cursorFunctions.click);
-    cursorFunctions.click = clickCallback;
-    $canvas.addEventListener('click', cursorFunctions.click);
+    $canvas.removeEventListener('mousedown', cursorFunctions.mouseDown);
+    cursorFunctions.mouseDown = mouseDownCallback;
+    $canvas.addEventListener('mousedown', cursorFunctions.mouseDown);
+    $canvas.removeEventListener('mouseup', cursorFunctions.mouseUp);
+    cursorFunctions.mouseUp = mouseUpCallback;
+    $canvas.addEventListener('mouseup', cursorFunctions.mouseUp);
+    $canvas.removeEventListener('mouseout', cursorFunctions.mouseOut);
+    cursorFunctions.mouseOut = mouseOutCallback;
+    $canvas.addEventListener('mouseout', cursorFunctions.mouseOut);
 }
 
 function setMenuHandlers() {
@@ -45,7 +54,10 @@ function setMenuHandlers() {
                 if (menuActions[targetPanelName] && $targetMenuElement.classList.contains('menu-item-selected')) menuActions[targetPanelName](targetPanelName);
                 break;
             case 'menu-edit':
-                setCursorFunctions(cursorMoveFunctions[$targetMenuElement.dataset.action], cursorClickFunctions[$targetMenuElement.dataset.action]);
+                setCursorFunctions(cursorMoveFunctions[$targetMenuElement.dataset.action], 
+                                    cursorMouseDownFunctions[$targetMenuElement.dataset.action], 
+                                    cursorMouseUpFunctions[$targetMenuElement.dataset.action],
+                                    cursorMouseOutFunctions[$targetMenuElement.dataset.action]);
                 if (editActions[$targetMenuElement.dataset.action]) editActions[$targetMenuElement.dataset.action]();
                 for (let $editButton of $editButtons) {
                     if ($editButton == $targetMenuElement && $editButton.value != 'Stop') $editButton.classList.add('edit-button-selected');
@@ -113,16 +125,39 @@ const cursorMoveFunctions = {
             const tileImg = terrainTiles[cursorImageType];
             const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
             cursorObject = {tileImg, cellX, cellY, imageX, imageY};
+            if (tileForReplace) {
+                if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = tileForReplace;
+            }
         }
     },
     stop: null
 }
 
-const cursorClickFunctions = {
+const cursorMouseDownFunctions = {
     terrain: function({clientX, clientY}) {
         if (map) {
             const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
-            map.grid[cellY][cellX] = cursorImageType;
+            tileForReplace = cursorImageType;
+            if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = tileForReplace;
+        }
+    },
+    stop: null
+}
+
+const cursorMouseUpFunctions = {
+    terrain: function() {
+        if (map) {
+            tileForReplace = null;
+        }
+    },
+    stop: null
+}
+
+const cursorMouseOutFunctions = {
+    terrain: function () {
+        if (map) {
+            tileForReplace = null;
+            cursorObject = null;
         }
     },
     stop: null
