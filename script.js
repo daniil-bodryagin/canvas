@@ -3,6 +3,7 @@ const canvasCtx = $canvas.getContext('2d');
 const $menu = document.querySelector('.menu');
 const $menuItems = $menu.querySelectorAll('.menu-item');
 const $menuPanels = document.querySelectorAll('.panel');
+const $editButtons = document.querySelectorAll('[data-type=menu-edit]');
 const $terrainTiles = [];
 const terrainTiles = {};
 let cursorFunction;
@@ -37,11 +38,10 @@ function setMenuHandlers() {
                 if (menuActions[targetPanelName] && $targetMenuElement.classList.contains('menu-item-selected')) menuActions[targetPanelName](targetPanelName);
                 break;
             case 'menu-edit':
-                const $editButtons = document.querySelectorAll('.edit-button');
                 setCursorFunction(cursorFunctions[$targetMenuElement.dataset.action]);
                 if (editActions[$targetMenuElement.dataset.action]) editActions[$targetMenuElement.dataset.action]();
                 for (let $editButton of $editButtons) {
-                    if ($editButton == $targetMenuElement && $editButton.value != 'Stop') $editButton.classList.toggle('edit-button-selected');
+                    if ($editButton == $targetMenuElement && $editButton.value != 'Stop') $editButton.classList.add('edit-button-selected');
                     else $editButton.classList.remove('edit-button-selected');
                 }
                 break;
@@ -83,9 +83,24 @@ const menuActions = {
     delete: createMapList
 }
 
+function getCellUnderCursor(cursorX, cursorY) {
+    const cellX = map.size + Math.ceil((cursorX + cameraX - 2 * (cursorY + cameraY) - tileHalfWidth) / tileWidth);
+    const cellY = Math.ceil((cursorX + cameraX + 2 * (cursorY + cameraY) - tileHalfWidth) / tileWidth);
+    return {cellX, cellY};
+}
+
 const cursorFunctions = {
     terrain: function({clientX, clientY}) {
-        console.log(clientX, clientY);
+        if (map) {
+            const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
+            //console.log(cellX, cellY);
+    
+            const tileImg = terrainTiles['img/terrain/sample_10.png'];
+            const imageX = (cellY + (cellX - map.size) - 1) * tileHalfWidth - cameraX;
+            const imageY = (cellY - (cellX - map.size) - 1) * tileHalfHeight - cameraY;
+            cursorObject = {tileImg, cellX, cellY, imageX, imageY};
+            //canvasCtx.drawImage(tileImg, imageX, imageY);
+        }
     },
     stop: null
 }
@@ -94,6 +109,7 @@ const editActions = {
     terrain: function() {
         const $terrainList = document.querySelector('.tile-list');
         const terrainSources = Object.keys(terrainTiles);
+        $terrainList.innerHTML = '';
         for (let terrainSource of terrainSources) {
             $terrainList.insertAdjacentHTML('beforeend', `
             <input type="radio" name="tile-radio" id="${terrainSource}" class="tile-radio">
@@ -172,6 +188,7 @@ let cameraSpeedX = 0;
 let cameraSpeedY = 0;
 const cameraSpeedLimit = 50;
 const frameLapse = 30;
+let cursorObject;
 main();
 
 
@@ -223,6 +240,8 @@ function main() {
         const startCellShiftY = cameraY - startCellY * tileHeight;
         //console.log([startCellX, startCellY, startCellShiftX, startCellShiftY]);
 
+        //canvasCtx.strokeStyle = "white"
+
         if (map) {
             const {size, grid} = map;
             for (let row = 0; row < tilesPerColumn + 3; row++) {
@@ -235,6 +254,7 @@ function main() {
                         const imageX = col * tileWidth - tileHalfWidth - startCellShiftX;
                         const imageY = row * tileHeight - tileHalfHeight - startCellShiftY;
                         canvasCtx.drawImage(tileImg, imageX, imageY);
+                        //canvasCtx.strokeText(`${currentCellRow}, ${currentCellCol}`, imageX + 16, imageY + 20);
                     }                    
                 }
                 for (let col = 0; col < tilesPerRow + 2; col++) {
@@ -246,9 +266,14 @@ function main() {
                         const imageX = col * tileWidth - startCellShiftX;
                         const imageY = row * tileHeight - startCellShiftY;
                         canvasCtx.drawImage(tileImg, imageX, imageY);
+                        //canvasCtx.strokeText(`${currentCellRow}, ${currentCellCol}`, imageX + 16, imageY + 20);
                     }
                 }
             }
+            if (cursorObject) {
+                if (cursorObject.cellY < grid.length && cursorObject.cellY >= 0 && cursorObject.cellX < grid[0].length && cursorObject.cellX >= 0)
+                    canvasCtx.drawImage(cursorObject.tileImg, cursorObject.imageX, cursorObject.imageY);
+            }            
         }        
     }
 
