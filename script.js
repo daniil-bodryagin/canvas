@@ -6,13 +6,19 @@ const $menuPanels = document.querySelectorAll('.panel');
 const $editButtons = document.querySelectorAll('[data-type=menu-edit]');
 const $terrainTiles = [];
 const terrainTiles = {};
-let cursorFunction;
+const cursorFunctions = {
+    move: null,
+    click: null
+};
 let cursorImageType;
 
-function setCursorFunction(callback) {
-    $canvas.removeEventListener('mousemove', cursorFunction);
-    cursorFunction = callback;
-    $canvas.addEventListener('mousemove', cursorFunction);
+function setCursorFunctions(moveCallback, clickCallback) {
+    $canvas.removeEventListener('mousemove', cursorFunctions.move);
+    cursorFunctions.move = moveCallback;
+    $canvas.addEventListener('mousemove', cursorFunctions.move);
+    $canvas.removeEventListener('click', cursorFunctions.click);
+    cursorFunctions.click = clickCallback;
+    $canvas.addEventListener('click', cursorFunctions.click);
 }
 
 function setMenuHandlers() {
@@ -39,7 +45,7 @@ function setMenuHandlers() {
                 if (menuActions[targetPanelName] && $targetMenuElement.classList.contains('menu-item-selected')) menuActions[targetPanelName](targetPanelName);
                 break;
             case 'menu-edit':
-                setCursorFunction(cursorFunctions[$targetMenuElement.dataset.action]);
+                setCursorFunctions(cursorMoveFunctions[$targetMenuElement.dataset.action], cursorClickFunctions[$targetMenuElement.dataset.action]);
                 if (editActions[$targetMenuElement.dataset.action]) editActions[$targetMenuElement.dataset.action]();
                 for (let $editButton of $editButtons) {
                     if ($editButton == $targetMenuElement && $editButton.value != 'Stop') $editButton.classList.add('edit-button-selected');
@@ -99,7 +105,7 @@ function getCellCoordsForCanvas(cellX, cellY) {
     return {imageX, imageY};
 }
 
-const cursorFunctions = {
+const cursorMoveFunctions = {
     terrain: function({clientX, clientY}) {
         if (map) {
             const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
@@ -107,6 +113,16 @@ const cursorFunctions = {
             const tileImg = terrainTiles[cursorImageType];
             const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
             cursorObject = {tileImg, cellX, cellY, imageX, imageY};
+        }
+    },
+    stop: null
+}
+
+const cursorClickFunctions = {
+    terrain: function({clientX, clientY}) {
+        if (map) {
+            const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
+            map.grid[cellY][cellX] = cursorImageType;
         }
     },
     stop: null
