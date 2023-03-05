@@ -93,17 +93,20 @@ function getCellUnderCursor(cursorX, cursorY) {
     return {cellX, cellY};
 }
 
+function getCellCoordsForCanvas(cellX, cellY) {
+    const imageX = (cellY + (cellX - map.size) - 1) * tileHalfWidth - cameraX;
+    const imageY = (cellY - (cellX - map.size) - 1) * tileHalfHeight - cameraY;
+    return {imageX, imageY};
+}
+
 const cursorFunctions = {
     terrain: function({clientX, clientY}) {
         if (map) {
             const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
             //console.log(cellX, cellY);
-    
             const tileImg = terrainTiles[cursorImageType];
-            const imageX = (cellY + (cellX - map.size) - 1) * tileHalfWidth - cameraX;
-            const imageY = (cellY - (cellX - map.size) - 1) * tileHalfHeight - cameraY;
+            const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
             cursorObject = {tileImg, cellX, cellY, imageX, imageY};
-            //canvasCtx.drawImage(tileImg, imageX, imageY);
         }
     },
     stop: null
@@ -123,6 +126,9 @@ const editActions = {
         const $firstTerrain = $terrainList.querySelector('input:first-child');
         $firstTerrain.setAttribute('checked','checked');
         cursorImageType = $firstTerrain.id;
+    },
+    stop: function() {
+        cursorObject = null;
     }
 }
 
@@ -242,8 +248,6 @@ function main() {
         const tilesPerColumn = Math.floor(screenHeight / tileHeight);
         const startCellX = Math.floor(cameraX / tileWidth);
         const startCellY = Math.floor(cameraY / tileHeight);
-        const startCellShiftX = cameraX - startCellX * tileWidth;
-        const startCellShiftY = cameraY - startCellY * tileHeight;
         //console.log([startCellX, startCellY, startCellShiftX, startCellShiftY]);
 
         //canvasCtx.strokeStyle = "white"
@@ -257,8 +261,7 @@ function main() {
                     if (currentCellRow < grid.length && currentCellRow >= 0 && currentCellCol < grid[0].length && currentCellCol >= 0) {
                         const tileType = grid[currentCellRow][currentCellCol];
                         const tileImg = terrainTiles[tileType];
-                        const imageX = col * tileWidth - tileHalfWidth - startCellShiftX;
-                        const imageY = row * tileHeight - tileHalfHeight - startCellShiftY;
+                        const {imageX, imageY} = getCellCoordsForCanvas(currentCellCol, currentCellRow);
                         canvasCtx.drawImage(tileImg, imageX, imageY);
                         //canvasCtx.strokeText(`${currentCellRow}, ${currentCellCol}`, imageX + 16, imageY + 20);
                     }                    
@@ -269,8 +272,7 @@ function main() {
                     if (currentCellRow < grid.length && currentCellRow >= 0 && currentCellCol < grid[0].length && currentCellCol >= 0) {
                         const tileType = grid[currentCellRow][currentCellCol];
                         const tileImg = terrainTiles[tileType];
-                        const imageX = col * tileWidth - startCellShiftX;
-                        const imageY = row * tileHeight - startCellShiftY;
+                        const {imageX, imageY} = getCellCoordsForCanvas(currentCellCol, currentCellRow);
                         canvasCtx.drawImage(tileImg, imageX, imageY);
                         //canvasCtx.strokeText(`${currentCellRow}, ${currentCellCol}`, imageX + 16, imageY + 20);
                     }
