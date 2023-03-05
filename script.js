@@ -7,6 +7,7 @@ const $editButtons = document.querySelectorAll('[data-type=menu-edit]');
 const $terrainTiles = [];
 const terrainTiles = {};
 let cursorFunction;
+let cursorImageType;
 
 function setCursorFunction(callback) {
     $canvas.removeEventListener('mousemove', cursorFunction);
@@ -47,6 +48,9 @@ function setMenuHandlers() {
                 break;
             case 'menu-close':
                 $targetMenuElement.closest('.panel').classList.remove('show-panel');
+                break;
+            case 'object-select':
+                cursorImageType = $targetMenuElement.id;
                 break;
         }    
     });
@@ -95,7 +99,7 @@ const cursorFunctions = {
             const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
             //console.log(cellX, cellY);
     
-            const tileImg = terrainTiles['img/terrain/sample_10.png'];
+            const tileImg = terrainTiles[cursorImageType];
             const imageX = (cellY + (cellX - map.size) - 1) * tileHalfWidth - cameraX;
             const imageY = (cellY - (cellX - map.size) - 1) * tileHalfHeight - cameraY;
             cursorObject = {tileImg, cellX, cellY, imageX, imageY};
@@ -112,11 +116,13 @@ const editActions = {
         $terrainList.innerHTML = '';
         for (let terrainSource of terrainSources) {
             $terrainList.insertAdjacentHTML('beforeend', `
-            <input type="radio" name="tile-radio" id="${terrainSource}" class="tile-radio">
+            <input type="radio" name="tile-radio" id="${terrainSource}" class="tile-radio" data-type="object-select">
             <label for="${terrainSource}" class="tile-label"><img src="${terrainSource}" class="tile-icon"></label>
         `);
         }
-        $terrainList.querySelector('input:first-child').setAttribute('checked','checked');
+        const $firstTerrain = $terrainList.querySelector('input:first-child');
+        $firstTerrain.setAttribute('checked','checked');
+        cursorImageType = $firstTerrain.id;
     }
 }
 
