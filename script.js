@@ -79,7 +79,7 @@ const menuActions = {
         $targetMenuElement.closest('.panel').classList.remove('show-panel');
     },
     'object-select': function($targetMenuElement) {
-        cursorImageType = $targetMenuElement.id;
+        cursorObject.imageType = $targetMenuElement.id;
     }
 }
 
@@ -109,30 +109,33 @@ const cursorFunctions = {
             if (map) {
                 const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
                 //console.log(cellX, cellY);
-                const tileImg = terrainTiles[cursorImageType];
                 const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
-                cursorObject = {tileImg, cellX, cellY, imageX, imageY};
-                if (cursorImage) {
-                    if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorImage;
+                cursorObject.cellX = cellX;
+                cursorObject.cellY = cellY;
+                cursorObject.imageX = imageX;
+                cursorObject.imageY = imageY;
+                if (cursorObject.isDragging) {
+                    if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorObject.imageType;
                 }
             }
         },
         mousedown: function({clientX, clientY}) {
             if (map) {
                 const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
-                cursorImage = cursorImageType;
-                if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorImage;
+                cursorObject.isDragging = true;
+                if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorObject.imageType;
             }
         },
         mouseup: function() {
             if (map) {
-                cursorImage = null;
+                cursorObject.isDragging = false;
             }
         },
         mouseout: function () {
             if (map) {
-                cursorImage = null;
-                cursorObject = null;
+                cursorObject.cellX = Infinity;
+                cursorObject.cellY = Infinity;
+                cursorObject.isDragging = false;
             }
         }
     },
@@ -157,10 +160,10 @@ const editActions = {
         }
         const $firstTerrain = $terrainList.querySelector('input:first-child');
         $firstTerrain.setAttribute('checked','checked');
-        cursorImageType = $firstTerrain.id;
+        cursorObject.imageType = $firstTerrain.id;
     },
     stop: function() {
-        cursorObject = null;
+        cursorObject.imageType = null;
     }
 }
 
@@ -234,9 +237,7 @@ const cameraSpeedLimit = 50;
 const frameLapse = 30;
 
 const cursorActiveFunctions = {};
-let cursorImageType;
-let cursorImage;
-let cursorObject;
+let cursorObject = {};
 
 main();
 
@@ -315,11 +316,12 @@ function main() {
                     }
                 }
             }
-            if (cursorObject) {
-                if (cursorObject.cellY < grid.length && cursorObject.cellY >= 0 && cursorObject.cellX < grid[0].length && cursorObject.cellX >= 0)
+            if (cursorObject.imageType) {
+                if (cursorObject.cellY < grid.length && cursorObject.cellY >= 0 && cursorObject.cellX < grid[0].length && cursorObject.cellX >= 0) {
                     canvasCtx.globalAlpha = 0.5;
-                    canvasCtx.drawImage(cursorObject.tileImg, cursorObject.imageX, cursorObject.imageY);
+                    canvasCtx.drawImage(terrainTiles[cursorObject.imageType], cursorObject.imageX, cursorObject.imageY);
                     canvasCtx.globalAlpha = 1;
+                }
             }            
         }        
     }
