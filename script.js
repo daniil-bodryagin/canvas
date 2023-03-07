@@ -1,4 +1,4 @@
-window.onsubmit = function(event) {
+document.onsubmit = function(event) {
     event.preventDefault();
 };
 
@@ -8,7 +8,6 @@ const $menu = document.querySelector('.menu');
 const $menuItems = $menu.querySelectorAll('.menu-item');
 const $menuPanels = document.querySelectorAll('.panel');
 const $editButtons = document.querySelectorAll('[data-type=menu-edit]');
-const $terrainTiles = [];
 const terrainTiles = {};
 
 function setCursorActiveFunctions(cursorFunctions) {
@@ -109,7 +108,7 @@ const cursorFunctions = {
             if (map) {
                 const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
                 if (cellX != cursorObject.cellX || cellY != cursorObject.cellY) {
-                    console.log(cellX, cellY);
+                    //console.log(cellX, cellY);
                     const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
                     cursorObject.cellX = cellX;
                     cursorObject.cellY = cellY;
@@ -279,8 +278,8 @@ function main() {
         const deltaTime = (newTime - startTime) / 1000;
         //console.log(deltaTime);
         startTime = newTime;
-        cameraX += cameraSpeedX * deltaTime;
-        cameraY += cameraSpeedY * deltaTime;
+        cameraX += Math.floor(cameraSpeedX * deltaTime);
+        cameraY += Math.floor(cameraSpeedY * deltaTime);
         //console.log(cameraX, cameraY);
         canvasCtx.fillRect(0, 0, screenWidth, screenHeight);
 
