@@ -1,3 +1,7 @@
+window.onsubmit = function(event) {
+    event.preventDefault();
+};
+
 const $canvas = document.querySelector('.canvas');
 const canvasCtx = $canvas.getContext('2d');
 const $menu = document.querySelector('.menu');
@@ -6,79 +10,22 @@ const $menuPanels = document.querySelectorAll('.panel');
 const $editButtons = document.querySelectorAll('[data-type=menu-edit]');
 const $terrainTiles = [];
 const terrainTiles = {};
-const cursorFunctions = {
-    move: null,
-    mouseDown: null,
-    mouseUp: null,
-    mouseOut: null
-};
-let cursorImageType;
-let tileForReplace;
 
-function setCursorFunctions(moveCallback, mouseDownCallback, mouseUpCallback, mouseOutCallback) {
-    $canvas.removeEventListener('mousemove', cursorFunctions.move);
-    cursorFunctions.move = moveCallback;
-    $canvas.addEventListener('mousemove', cursorFunctions.move);
-    $canvas.removeEventListener('mousedown', cursorFunctions.mouseDown);
-    cursorFunctions.mouseDown = mouseDownCallback;
-    $canvas.addEventListener('mousedown', cursorFunctions.mouseDown);
-    $canvas.removeEventListener('mouseup', cursorFunctions.mouseUp);
-    cursorFunctions.mouseUp = mouseUpCallback;
-    $canvas.addEventListener('mouseup', cursorFunctions.mouseUp);
-    $canvas.removeEventListener('mouseout', cursorFunctions.mouseOut);
-    cursorFunctions.mouseOut = mouseOutCallback;
-    $canvas.addEventListener('mouseout', cursorFunctions.mouseOut);
+function setCursorActiveFunctions(cursorFunctions) {
+    const events = Object.keys(cursorFunctions);
+    for (let event of events) {
+        $canvas.removeEventListener(event, cursorActiveFunctions[event]);
+        cursorActiveFunctions[event] = cursorFunctions[event];
+        $canvas.addEventListener(event, cursorActiveFunctions[event]);
+    }
 }
 
 function setMenuHandlers() {
     $menu.addEventListener('click', ({target}) => {
         const $targetMenuElement = target.closest('[data-type]');
         if (!$targetMenuElement) return;
-        switch ($targetMenuElement.dataset.type) {
-            case 'menu-item':
-                const targetPanelName = $targetMenuElement.dataset.panelName;
-                for (let $menuItem of $menuItems) {
-                    if ($targetMenuElement == $menuItem) {
-                        $menuItem.classList.toggle('menu-item-selected');
-                    } else {
-                        $menuItem.classList.remove('menu-item-selected');
-                    }
-                }
-                for (let $panel of $menuPanels) {
-                    if ($panel.classList.contains(`${targetPanelName}`)) {
-                        $panel.classList.toggle('show-panel');
-                    } else {
-                        $panel.classList.remove('show-panel');
-                    }
-                }
-                if (menuActions[targetPanelName] && $targetMenuElement.classList.contains('menu-item-selected')) menuActions[targetPanelName](targetPanelName);
-                break;
-            case 'menu-edit':
-                setCursorFunctions(cursorMoveFunctions[$targetMenuElement.dataset.action], 
-                                    cursorMouseDownFunctions[$targetMenuElement.dataset.action], 
-                                    cursorMouseUpFunctions[$targetMenuElement.dataset.action],
-                                    cursorMouseOutFunctions[$targetMenuElement.dataset.action]);
-                if (editActions[$targetMenuElement.dataset.action]) editActions[$targetMenuElement.dataset.action]();
-                for (let $editButton of $editButtons) {
-                    if ($editButton == $targetMenuElement && $editButton.value != 'Stop') $editButton.classList.add('edit-button-selected');
-                    else $editButton.classList.remove('edit-button-selected');
-                }
-                break;
-            case 'menu-close':
-                $targetMenuElement.closest('.panel').classList.remove('show-panel');
-                break;
-            case 'object-select':
-                cursorImageType = $targetMenuElement.id;
-                break;
-        }    
+        menuActions[$targetMenuElement.dataset.type]($targetMenuElement);
     });
-    const $menuForms = $menu.querySelectorAll('.form');
-    for (let $menuForm of $menuForms) {
-        $menuForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            actions[$menuForm.dataset.action](event);
-        });
-    }
 }
 
 
@@ -98,6 +45,45 @@ function createMapList(panelName) {
 }
 
 const menuActions = {
+    'menu-item': function($targetMenuElement) {
+        const targetPanelName = $targetMenuElement.dataset.panelName;
+        for (let $menuItem of $menuItems) {
+            if ($targetMenuElement == $menuItem) {
+                $menuItem.classList.toggle('menu-item-selected');
+            } else {
+                $menuItem.classList.remove('menu-item-selected');
+            }
+        }
+        for (let $panel of $menuPanels) {
+            if ($panel.classList.contains(`${targetPanelName}`)) {
+                $panel.classList.toggle('show-panel');
+            } else {
+                $panel.classList.remove('show-panel');
+            }
+        }
+        if (menuItemActions[targetPanelName] && $targetMenuElement.classList.contains('menu-item-selected')) menuItemActions[targetPanelName](targetPanelName);
+    },
+    'menu-submit': function($targetMenuElement) {
+        const $menuForm = $targetMenuElement.closest('.form');
+        formActions[$menuForm.dataset.action]($menuForm);
+    },
+    'menu-edit': function($targetMenuElement) {
+        setCursorActiveFunctions(cursorFunctions[$targetMenuElement.dataset.action]);
+        if (editActions[$targetMenuElement.dataset.action]) editActions[$targetMenuElement.dataset.action]();
+        for (let $editButton of $editButtons) {
+            if ($editButton == $targetMenuElement && $editButton.value != 'Stop') $editButton.classList.add('edit-button-selected');
+            else $editButton.classList.remove('edit-button-selected');
+        }
+    },
+    'menu-close': function($targetMenuElement) {
+        $targetMenuElement.closest('.panel').classList.remove('show-panel');
+    },
+    'object-select': function($targetMenuElement) {
+        cursorImageType = $targetMenuElement.id;
+    }
+}
+
+const menuItemActions = {
     open: createMapList,
     save: function() {  
         if (map) document.querySelector('#name-save').value = map.name;
@@ -117,50 +103,45 @@ function getCellCoordsForCanvas(cellX, cellY) {
     return {imageX, imageY};
 }
 
-const cursorMoveFunctions = {
-    terrain: function({clientX, clientY}) {
-        if (map) {
-            const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
-            //console.log(cellX, cellY);
-            const tileImg = terrainTiles[cursorImageType];
-            const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
-            cursorObject = {tileImg, cellX, cellY, imageX, imageY};
-            if (tileForReplace) {
-                if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = tileForReplace;
+const cursorFunctions = {
+    terrain: {
+        mousemove: function({clientX, clientY}) {
+            if (map) {
+                const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
+                //console.log(cellX, cellY);
+                const tileImg = terrainTiles[cursorImageType];
+                const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
+                cursorObject = {tileImg, cellX, cellY, imageX, imageY};
+                if (cursorImage) {
+                    if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorImage;
+                }
+            }
+        },
+        mousedown: function({clientX, clientY}) {
+            if (map) {
+                const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
+                cursorImage = cursorImageType;
+                if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorImage;
+            }
+        },
+        mouseup: function() {
+            if (map) {
+                cursorImage = null;
+            }
+        },
+        mouseout: function () {
+            if (map) {
+                cursorImage = null;
+                cursorObject = null;
             }
         }
     },
-    stop: null
-}
-
-const cursorMouseDownFunctions = {
-    terrain: function({clientX, clientY}) {
-        if (map) {
-            const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
-            tileForReplace = cursorImageType;
-            if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = tileForReplace;
-        }
-    },
-    stop: null
-}
-
-const cursorMouseUpFunctions = {
-    terrain: function() {
-        if (map) {
-            tileForReplace = null;
-        }
-    },
-    stop: null
-}
-
-const cursorMouseOutFunctions = {
-    terrain: function () {
-        if (map) {
-            tileForReplace = null;
-            cursorObject = null;
-        }
-    },
-    stop: null
+    stop: {
+        mousemove: null,
+        mousedown: null,
+        mouseup: null,
+        mouseout: null
+    }
 }
 
 const editActions = {
@@ -183,11 +164,11 @@ const editActions = {
     }
 }
 
-const actions = {
-    new: function({target}) {
+const formActions = {
+    new: function($menuForm) {
         map = {
-            name: target.querySelector('#name').value,
-            size: parseInt(target.querySelector('#size').value),
+            name: $menuForm.querySelector('#name').value,
+            size: parseInt($menuForm.querySelector('#size').value),
             grid: []
         }
         for (let row = 0; row < map.size * 2 + 1; row++) {
@@ -198,8 +179,8 @@ const actions = {
             map.grid.push(mapRow);
         }
     },
-    open: function({target}) {
-        const $selectedMap = target.querySelector('input:checked');
+    open: function($menuForm) {
+        const $selectedMap = $menuForm.querySelector('input:checked');
         if ($selectedMap) {
             fetch(`http://127.0.0.1:8000/${$selectedMap.dataset.name}`)
             .then(response => response.json())
@@ -207,9 +188,9 @@ const actions = {
             .catch(error => console.log(`Server doesn't respond`));
         }
     },
-    save: function({target}) {
+    save: function($menuForm) {
         if (map) {
-            const name = target.querySelector('#name-save').value;
+            const name = $menuForm.querySelector('#name-save').value;
             const {...mapCopy} = {...map};
             mapCopy.name = name;
             fetch(`http://127.0.0.1:8000/${mapCopy.name}`, {
@@ -223,9 +204,9 @@ const actions = {
             }).then(result => alert(result.message)).catch(error => console.log(`Server doesn't respond`));
         }
     },
-    delete: function({target}) {
-        const $selectedMap = target.querySelector('input:checked');
-        const $selectedMapLabel = target.querySelector('input:checked + label');
+    delete: function($menuForm) {
+        const $selectedMap = $menuForm.querySelector('input:checked');
+        const $selectedMapLabel = $menuForm.querySelector('input:checked + label');
         if ($selectedMap) {
             fetch(`http://127.0.0.1:8000/${$selectedMap.dataset.name}`, {
                 method: 'DELETE'
@@ -251,7 +232,12 @@ let cameraSpeedX = 0;
 let cameraSpeedY = 0;
 const cameraSpeedLimit = 50;
 const frameLapse = 30;
+
+const cursorActiveFunctions = {};
+let cursorImageType;
+let cursorImage;
 let cursorObject;
+
 main();
 
 
