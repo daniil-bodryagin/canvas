@@ -317,7 +317,9 @@ function main() {
             }
             if (cursorObject) {
                 if (cursorObject.cellY < grid.length && cursorObject.cellY >= 0 && cursorObject.cellX < grid[0].length && cursorObject.cellX >= 0)
+                    canvasCtx.globalAlpha = 0.5;
                     canvasCtx.drawImage(cursorObject.tileImg, cursorObject.imageX, cursorObject.imageY);
+                    canvasCtx.globalAlpha = 1;
             }            
         }        
     }
