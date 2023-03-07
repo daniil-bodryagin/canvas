@@ -14,6 +14,9 @@ export function setMenuHandlers() {
         if (!$targetMenuElement) return;
         menuActions[$targetMenuElement.dataset.type]($targetMenuElement);
     });
+    document.onsubmit = function(event) {
+        event.preventDefault();
+    };
 }
 
 const menuActions = {

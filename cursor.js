@@ -1,6 +1,4 @@
-import { $canvas } from "./script.js";
-import { getCellUnderCursor } from "./script.js";
-
+import { $canvas, camera } from "./camera.js";
 import { map } from "./map.js";
 
 export const cursor = {
@@ -37,7 +35,7 @@ const cursorFunctions = {
     terrain: {
         mousemove: function({clientX, clientY}) {
             if (!map.isEmpty()) {
-                const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
+                const {cellX, cellY} = camera.getCellUnderCursor(clientX, clientY);
                 if (cursor.isCellChanged(cellX, cellY)) {
                     cursor.setCoords(cellX, cellY);
                     if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) {
