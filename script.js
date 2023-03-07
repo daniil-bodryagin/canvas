@@ -108,15 +108,17 @@ const cursorFunctions = {
         mousemove: function({clientX, clientY}) {
             if (map) {
                 const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
-                //console.log(cellX, cellY);
-                const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
-                cursorObject.cellX = cellX;
-                cursorObject.cellY = cellY;
-                cursorObject.imageX = imageX;
-                cursorObject.imageY = imageY;
-                if (cursorObject.isDragging) {
-                    if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorObject.imageType;
-                }
+                if (cellX != cursorObject.cellX || cellY != cursorObject.cellY) {
+                    console.log(cellX, cellY);
+                    const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
+                    cursorObject.cellX = cellX;
+                    cursorObject.cellY = cellY;
+                    cursorObject.imageX = imageX;
+                    cursorObject.imageY = imageY;
+                    if (cursorObject.isDragging) {
+                        if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorObject.imageType;
+                    }
+                }                
             }
         },
         mousedown: function({clientX, clientY}) {
