@@ -1,262 +1,43 @@
+import { loader } from "./loader.js";
+import { map } from "./map.js";
+import { cursor } from "./cursor.js";
+
 document.onsubmit = function(event) {
     event.preventDefault();
 };
 
-const $canvas = document.querySelector('.canvas');
+export const $canvas = document.querySelector('.canvas');
 const canvasCtx = $canvas.getContext('2d');
-const $menu = document.querySelector('.menu');
-const $menuItems = $menu.querySelectorAll('.menu-item');
-const $menuPanels = document.querySelectorAll('.panel');
-const $editButtons = document.querySelectorAll('[data-type=menu-edit]');
-const terrainTiles = {};
 
-function setCursorActiveFunctions(cursorFunctions) {
-    const events = Object.keys(cursorFunctions);
-    for (let event of events) {
-        $canvas.removeEventListener(event, cursorActiveFunctions[event]);
-        cursorActiveFunctions[event] = cursorFunctions[event];
-        $canvas.addEventListener(event, cursorActiveFunctions[event]);
-    }
+function getCellCoordsForCanvas({cellX, cellY}) {
+    const imageX = (cellY + (cellX - map.getSize()) - 1) * tileHalfWidth - cameraX;
+    const imageY = (cellY - (cellX - map.getSize()) - 1) * tileHalfHeight - cameraY;
+    return {imageX, imageY};
 }
 
-function setMenuHandlers() {
-    $menu.addEventListener('click', ({target}) => {
-        const $targetMenuElement = target.closest('[data-type]');
-        if (!$targetMenuElement) return;
-        menuActions[$targetMenuElement.dataset.type]($targetMenuElement);
-    });
-}
-
-
-function createMapList(panelName) {
-    fetch('http://127.0.0.1:8000')
-        .then(response => response.json())
-        .then(mapList => {
-            const $mapList = document.querySelector(`.${panelName} .map-list`);
-            $mapList.innerHTML = '';
-            for (let {name} of mapList) {
-                const nameSplitted = name.split('.')[0];
-                $mapList.insertAdjacentHTML('beforeend', `
-                    <input type="radio" name="map-radio" id="${panelName}-${nameSplitted}" class="map-radio" data-name="${nameSplitted}">
-                    <label for="${panelName}-${nameSplitted}" class="map-label">${nameSplitted}</label>`);
-            }
-        }).catch(error => console.log(`Server doesn't respond`));
-}
-
-const menuActions = {
-    'menu-item': function($targetMenuElement) {
-        const targetPanelName = $targetMenuElement.dataset.panelName;
-        for (let $menuItem of $menuItems) {
-            if ($targetMenuElement == $menuItem) {
-                $menuItem.classList.toggle('menu-item-selected');
-            } else {
-                $menuItem.classList.remove('menu-item-selected');
-            }
-        }
-        for (let $panel of $menuPanels) {
-            if ($panel.classList.contains(`${targetPanelName}`)) {
-                $panel.classList.toggle('show-panel');
-            } else {
-                $panel.classList.remove('show-panel');
-            }
-        }
-        if (menuItemActions[targetPanelName] && $targetMenuElement.classList.contains('menu-item-selected')) menuItemActions[targetPanelName](targetPanelName);
-    },
-    'menu-submit': function($targetMenuElement) {
-        const $menuForm = $targetMenuElement.closest('.form');
-        formActions[$menuForm.dataset.action]($menuForm);
-    },
-    'menu-edit': function($targetMenuElement) {
-        setCursorActiveFunctions(cursorFunctions[$targetMenuElement.dataset.action]);
-        if (editActions[$targetMenuElement.dataset.action]) editActions[$targetMenuElement.dataset.action]();
-        for (let $editButton of $editButtons) {
-            if ($editButton == $targetMenuElement && $editButton.value != 'Stop') $editButton.classList.add('edit-button-selected');
-            else $editButton.classList.remove('edit-button-selected');
-        }
-    },
-    'menu-close': function($targetMenuElement) {
-        $targetMenuElement.closest('.panel').classList.remove('show-panel');
-    },
-    'object-select': function($targetMenuElement) {
-        cursorObject.imageType = $targetMenuElement.id;
-    }
-}
-
-const menuItemActions = {
-    open: createMapList,
-    save: function() {  
-        if (map) document.querySelector('#name-save').value = map.name;
-    },
-    delete: createMapList
-}
-
-function getCellUnderCursor(cursorX, cursorY) {
-    const cellX = map.size + Math.ceil((cursorX + cameraX - 2 * (cursorY + cameraY) - tileHalfWidth) / tileWidth);
+export function getCellUnderCursor(cursorX, cursorY) {
+    const cellX = map.getSize() + Math.ceil((cursorX + cameraX - 2 * (cursorY + cameraY) - tileHalfWidth) / tileWidth);
     const cellY = Math.ceil((cursorX + cameraX + 2 * (cursorY + cameraY) - tileHalfWidth) / tileWidth);
     return {cellX, cellY};
 }
 
-function getCellCoordsForCanvas(cellX, cellY) {
-    const imageX = (cellY + (cellX - map.size) - 1) * tileHalfWidth - cameraX;
-    const imageY = (cellY - (cellX - map.size) - 1) * tileHalfHeight - cameraY;
-    return {imageX, imageY};
-}
-
-const cursorFunctions = {
-    terrain: {
-        mousemove: function({clientX, clientY}) {
-            if (map) {
-                const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
-                if (cellX != cursorObject.cellX || cellY != cursorObject.cellY) {
-                    //console.log(cellX, cellY);
-                    const {imageX, imageY} = getCellCoordsForCanvas(cellX, cellY);
-                    cursorObject.cellX = cellX;
-                    cursorObject.cellY = cellY;
-                    cursorObject.imageX = imageX;
-                    cursorObject.imageY = imageY;
-                    if (cursorObject.isDragging) {
-                        if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorObject.imageType;
-                    }
-                }                
-            }
-        },
-        mousedown: function({clientX, clientY}) {
-            if (map) {
-                const {cellX, cellY} = getCellUnderCursor(clientX, clientY);
-                cursorObject.isDragging = true;
-                if (cellY < map.grid.length && cellY >= 0 && cellX < map.grid[0].length && cellX >= 0) map.grid[cellY][cellX] = cursorObject.imageType;
-            }
-        },
-        mouseup: function() {
-            if (map) {
-                cursorObject.isDragging = false;
-            }
-        },
-        mouseout: function () {
-            if (map) {
-                cursorObject.cellX = Infinity;
-                cursorObject.cellY = Infinity;
-                cursorObject.isDragging = false;
-            }
-        }
-    },
-    stop: {
-        mousemove: null,
-        mousedown: null,
-        mouseup: null,
-        mouseout: null
-    }
-}
-
-const editActions = {
-    terrain: function() {
-        const $terrainList = document.querySelector('.tile-list');
-        const terrainSources = Object.keys(terrainTiles);
-        $terrainList.innerHTML = '';
-        for (let terrainSource of terrainSources) {
-            $terrainList.insertAdjacentHTML('beforeend', `
-            <input type="radio" name="tile-radio" id="${terrainSource}" class="tile-radio" data-type="object-select">
-            <label for="${terrainSource}" class="tile-label"><img src="${terrainSource}" class="tile-icon"></label>
-        `);
-        }
-        const $firstTerrain = $terrainList.querySelector('input:first-child');
-        $firstTerrain.setAttribute('checked','checked');
-        cursorObject.imageType = $firstTerrain.id;
-    },
-    stop: function() {
-        cursorObject.imageType = null;
-    }
-}
-
-const formActions = {
-    new: function($menuForm) {
-        map = {
-            name: $menuForm.querySelector('#name').value,
-            size: parseInt($menuForm.querySelector('#size').value),
-            grid: []
-        }
-        for (let row = 0; row < map.size * 2 + 1; row++) {
-            const mapRow = [];
-            for (let col = 0; col < map.size * 2 + 1; col++) {
-                mapRow.push('img/terrain/sample_15.png');
-            }
-            map.grid.push(mapRow);
-        }
-    },
-    open: function($menuForm) {
-        const $selectedMap = $menuForm.querySelector('input:checked');
-        if ($selectedMap) {
-            fetch(`http://127.0.0.1:8000/${$selectedMap.dataset.name}`)
-            .then(response => response.json())
-            .then(result => map = JSON.parse(result))
-            .catch(error => console.log(`Server doesn't respond`));
-        }
-    },
-    save: function($menuForm) {
-        if (map) {
-            const name = $menuForm.querySelector('#name-save').value;
-            const {...mapCopy} = {...map};
-            mapCopy.name = name;
-            fetch(`http://127.0.0.1:8000/${mapCopy.name}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8'
-                },
-                body: JSON.stringify(mapCopy)
-            }).then(response => {
-                return response.json()
-            }).then(result => alert(result.message)).catch(error => console.log(`Server doesn't respond`));
-        }
-    },
-    delete: function($menuForm) {
-        const $selectedMap = $menuForm.querySelector('input:checked');
-        const $selectedMapLabel = $menuForm.querySelector('input:checked + label');
-        if ($selectedMap) {
-            fetch(`http://127.0.0.1:8000/${$selectedMap.dataset.name}`, {
-                method: 'DELETE'
-            }).then(response => {
-                return response.json()
-            }).then(result => alert(result.message)).catch(error => console.log(`Server doesn't respond`))
-        }
-        $selectedMap.remove();
-        $selectedMapLabel.remove();
-    }
-}
-
-let map;
-const tileHeight = 32;
-const tileWidth = 64;
-const tileHalfHeight = tileHeight / 2;
-const tileHalfWidth = tileWidth / 2;
+export const tileHeight = 32;
+export const tileWidth = 64;
+export const tileHalfHeight = tileHeight / 2;
+export const tileHalfWidth = tileWidth / 2;
 let screenHeight;
 let screenWidth;
-let cameraX = 0;
-let cameraY = 0;
+export let cameraX = 0;
+export let cameraY = 0;
 let cameraSpeedX = 0;
 let cameraSpeedY = 0;
 const cameraSpeedLimit = 50;
 const frameLapse = 30;
 
-const cursorActiveFunctions = {};
-let cursorObject = {};
-
-main();
-
-
-fetch('http://127.0.0.1:8000/img/terrain')
-    .then(response => response.json())
-    .then(terrainList => {
-        const tileSources = terrainList.map(({name}) => `img/terrain/${name}`);
-        const tileLoadPromises = tileSources.map(tileSource => new Promise(resolve => {
-            const tileImg = new Image();
-            tileImg.src = tileSource;
-            terrainTiles[tileSource] = tileImg;
-            tileImg.onload = resolve;
-        }));
-        Promise.all(tileLoadPromises).then(setMenuHandlers);
-    });
 
 function main() {
+    loader.init();
+    
     window.addEventListener('resize', () => {
         resize();
     });
@@ -291,36 +72,37 @@ function main() {
 
         //canvasCtx.strokeStyle = "white"
 
-        if (map) {
-            const {size, grid} = map;
+        if (!map.isEmpty()) {
+            const size = map.getGridSize();
             for (let row = 0; row < tilesPerColumn + 3; row++) {
                 for (let col = 0; col < tilesPerRow + 3; col++) {
-                    const currentCellRow = startCellX + startCellY + col + row;
-                    const currentCellCol = startCellX - startCellY + size + col - row;
-                    if (currentCellRow < grid.length && currentCellRow >= 0 && currentCellCol < grid[0].length && currentCellCol >= 0) {
-                        const tileType = grid[currentCellRow][currentCellCol];
-                        const tileImg = terrainTiles[tileType];
-                        const {imageX, imageY} = getCellCoordsForCanvas(currentCellCol, currentCellRow);
+                    const cellY = startCellX + startCellY + col + row;
+                    const cellX = startCellX - startCellY + map.getSize() + col - row;
+                    if (map.isCellInsideMap({cellX, cellY})) {
+                        const tileType = map.getCell({cellX, cellY});
+                        const tileImg = loader.terrainTiles[tileType];
+                        const {imageX, imageY} = getCellCoordsForCanvas({cellX, cellY});
                         canvasCtx.drawImage(tileImg, imageX, imageY);
-                        //canvasCtx.strokeText(`${currentCellRow}, ${currentCellCol}`, imageX + 16, imageY + 20);
+                        //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20);
                     }                    
                 }
                 for (let col = 0; col < tilesPerRow + 2; col++) {
-                    const currentCellRow = startCellX + startCellY + col + 1 + row;
-                    const currentCellCol = startCellX - startCellY + size + col - row;
-                    if (currentCellRow < grid.length && currentCellRow >= 0 && currentCellCol < grid[0].length && currentCellCol >= 0) {
-                        const tileType = grid[currentCellRow][currentCellCol];
-                        const tileImg = terrainTiles[tileType];
-                        const {imageX, imageY} = getCellCoordsForCanvas(currentCellCol, currentCellRow);
+                    const cellY = startCellX + startCellY + col + 1 + row;
+                    const cellX = startCellX - startCellY + map.getSize() + col - row;
+                    if (map.isCellInsideMap({cellX, cellY})) {
+                        const tileType = map.getCell({cellX, cellY});
+                        const tileImg = loader.terrainTiles[tileType];
+                        const {imageX, imageY} = getCellCoordsForCanvas({cellX, cellY});
                         canvasCtx.drawImage(tileImg, imageX, imageY);
-                        //canvasCtx.strokeText(`${currentCellRow}, ${currentCellCol}`, imageX + 16, imageY + 20);
+                        //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20);
                     }
                 }
             }
-            if (cursorObject.imageType) {
-                if (cursorObject.cellY < grid.length && cursorObject.cellY >= 0 && cursorObject.cellX < grid[0].length && cursorObject.cellX >= 0) {
+            if (cursor.getImage()) {
+                if (map.isCellInsideMap(cursor.getCoords())) {
                     canvasCtx.globalAlpha = 0.5;
-                    canvasCtx.drawImage(terrainTiles[cursorObject.imageType], cursorObject.imageX, cursorObject.imageY);
+                    const {imageX, imageY} = getCellCoordsForCanvas(cursor.getCoords());
+                    canvasCtx.drawImage(loader.terrainTiles[cursor.getImage()], imageX, imageY);
                     canvasCtx.globalAlpha = 1;
                 }
             }            
@@ -361,3 +143,5 @@ function main() {
         }
     }
 };
+
+main();
