@@ -1,10 +1,12 @@
 import { loader } from "./loader.js";
+import { fullSet } from "./config.js";
+import { menu } from "./menu.js";
 import { camera } from "./camera.js";
 
 const frameLapse = 30;
 
 function main() {
-    loader.init();
+    loader.init(fullSet).then(menu.init);
     camera.init();  
     
     let startTime = Date.now();

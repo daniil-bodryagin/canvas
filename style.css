@@ -101,7 +101,7 @@ html, body {
     appearance: none;
 }
 
-.tile-list {
+.asset-list {
     width: 264px;
     height: 340px;
     overflow-x: auto;
@@ -113,25 +113,25 @@ html, body {
     background-color: black;
 }
 
-.tile-radio {
+.asset-radio {
     margin: 0;
     appearance: none;
 }
 
-.tile-radio:checked + .tile-label {
+.asset-radio:checked + .tile-label {
     background-color: gray;
 }
 
-.tile-label {
+.asset-label {
     display: block;
     margin: 1px;
 }
 
-.tile-label:hover {
+.asset-label:hover {
     outline: 1px solid white;
 }
 
-.tile-icon {
+.asset-icon {
     width: 100%;
 }
 

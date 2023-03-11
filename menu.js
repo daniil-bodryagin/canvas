@@ -8,15 +8,17 @@ const $menuItems = $menu.querySelectorAll('.menu-item');
 const $menuPanels = $menu.querySelectorAll('.panel');
 const $editButtons = $menu.querySelectorAll('[data-type=menu-edit]');
 
-export function setMenuHandlers() {
-    $menu.addEventListener('click', ({target}) => {
-        const $targetMenuElement = target.closest('[data-type]');
-        if (!$targetMenuElement) return;
-        menuActions[$targetMenuElement.dataset.type]($targetMenuElement);
-    });
-    document.onsubmit = function(event) {
-        event.preventDefault();
-    };
+export const menu = {
+    init: function () {
+        $menu.addEventListener('click', ({target}) => {
+            const $targetMenuElement = target.closest('[data-type]');
+            if (!$targetMenuElement) return;
+            menuActions[$targetMenuElement.dataset.type]($targetMenuElement);
+        });
+        document.onsubmit = function(event) {
+            event.preventDefault();
+        };
+    }
 }
 
 const menuActions = {
@@ -44,9 +46,9 @@ const menuActions = {
         formActions[$menuForm.dataset.action]($menuForm);
     },
     'menu-edit': function($targetMenuElement) {
-        cursor.setCursorMode($targetMenuElement.dataset.action);
+        cursor.setCursorMode($targetMenuElement.dataset.action, $targetMenuElement.dataset.kind);
         if (editActions[$targetMenuElement.dataset.action]) {
-            editActions[$targetMenuElement.dataset.action]();
+            editActions[$targetMenuElement.dataset.action]($targetMenuElement);
         }            
         for (let $editButton of $editButtons) {
             if ($editButton == $targetMenuElement && $editButton.value != 'Stop') {
@@ -59,7 +61,7 @@ const menuActions = {
     'menu-close': function($targetMenuElement) {
         $targetMenuElement.closest('.panel').classList.remove('show-panel');
     },
-    'object-select': function($targetMenuElement) {
+    'asset-select': function($targetMenuElement) {
         cursor.setImage($targetMenuElement.id);
     }
 }

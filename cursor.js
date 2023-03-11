@@ -15,31 +15,32 @@ export const cursor = {
         const cellY = this.cellY;
         return {cellX, cellY};
     },
-    setImage: function(imageType) {
-        this.imageType = imageType;
+    setImage: function(assetName) {
+        this.assetName = assetName;
     },
     getImage: function() {
-        return this.imageType;
+        return this.assetName;
     },
-    setCursorMode: function(newMode) {
+    setCursorMode: function(newMode, kind) {
         const events = Object.keys(cursorFunctions[newMode]);
         for (let event of events) {
             $canvas.removeEventListener(event, cursorFunctions[this.mode][event]);
             $canvas.addEventListener(event, cursorFunctions[newMode][event]);
         }
+        this.layer = kind == 'terrain' ? 'terrain' : 'object';
         this.mode = newMode;
     }
 };
 
 const cursorFunctions = {
-    terrain: {
+    assets: {
         mousemove: function({clientX, clientY}) {
             if (!map.isEmpty()) {
                 const {cellX, cellY} = camera.getCellUnderCursor(clientX, clientY);
                 if (cursor.isCellChanged(cellX, cellY)) {
                     cursor.setCoords(cellX, cellY);
                     if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) {
-                        map.setCellTerrain(cursor.getCoords(), cursor.getImage()); /////////////////////////////
+                        map.setCellContent(cursor.getCoords(), cursor.getImage(), cursor.layer);
                     }
                 }                
             }
@@ -48,7 +49,7 @@ const cursorFunctions = {
             if (!map.isEmpty()) {
                 cursor.isDragging = true;
                 if (map.isCellInsideMap(cursor.getCoords())) {
-                    map.setCellTerrain(cursor.getCoords(), cursor.getImage());
+                    map.setCellContent(cursor.getCoords(), cursor.getImage(), cursor.layer);
                 }
             }
         },
@@ -61,38 +62,6 @@ const cursorFunctions = {
             if (!map.isEmpty()) {
                 cursor.setCoords(Infinity, Infinity);
                 cursor.isDragging = false;
-            }
-        }
-    },
-    objects: { ///////////////////////////// 
-        mousemove: function({clientX, clientY}) {///////////////////////////// 
-            if (!map.isEmpty()) {/////////////////////////////
-                const {cellX, cellY} = camera.getCellUnderCursor(clientX, clientY); /////////////////////////////
-                if (cursor.isCellChanged(cellX, cellY)) { /////////////////////////////
-                    cursor.setCoords(cellX, cellY); /////////////////////////////
-                    if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) { /////////////////////////////
-                        map.setCellObject(cursor.getCoords(), cursor.getImage()); /////////////////////////////
-                    }
-                }                
-            }
-        },
-        mousedown: function() { /////////////////////////////
-            if (!map.isEmpty()) { /////////////////////////////
-                cursor.isDragging = true; /////////////////////////////
-                if (map.isCellInsideMap(cursor.getCoords())) { /////////////////////////////
-                    map.setCellObject(cursor.getCoords(), cursor.getImage()); /////////////////////////////
-                }
-            }
-        },
-        mouseup: function() { /////////////////////////////
-            if (!map.isEmpty()) { /////////////////////////////
-                cursor.isDragging = false; /////////////////////////////
-            }
-        },
-        mouseout: function () { /////////////////////////////
-            if (!map.isEmpty()) { /////////////////////////////
-                cursor.setCoords(Infinity, Infinity); /////////////////////////////
-                cursor.isDragging = false; /////////////////////////////
             }
         }
     },
