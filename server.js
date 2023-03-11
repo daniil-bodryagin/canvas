@@ -44,14 +44,20 @@ const server = http.createServer(function(request, response) {
       console.log(mapList);
       response.writeHead(200, headers);
       response.end(JSON.stringify(mapList));
-    } else if (request.url == '/img/terrain') {
-      const terrainList = fs.readdirSync('./img/terrain', {withFileTypes: true});
+    } else if (request.url == '/img') { /////////////////////////////
+      const terrainList = fs.readdirSync('./img/terrain', {withFileTypes: true}).map(file => `img/terrain/${file.name}`); /////////////////////////////
       console.log(terrainList);
       terrainList.sort(
-        (a, b) => a.name.localeCompare(b.name, "en")
+        (a, b) => a.localeCompare(b, "en") /////////////////////////////
       );
+      const objectList = fs.readdirSync('./img/objects', {withFileTypes: true}).map(file => `img/objects/${file.name}`); /////////////////////////////
+      console.log(objectList); /////////////////////////////
+      objectList.sort( /////////////////////////////
+        (a, b) => a.localeCompare(b, "en") /////////////////////////////
+      ); /////////////////////////////
+      const unitedList = terrainList.concat(objectList); /////////////////////////////
       response.writeHead(200, headers);
-      response.end(JSON.stringify(terrainList));
+      response.end(JSON.stringify(unitedList)); /////////////////////////////
     } else {
       const map = fs.readFileSync(`../maps/${request.url}.json`, { encoding: "utf-8" });
       response.writeHead(200, headers);

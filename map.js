@@ -17,11 +17,17 @@ export const map = {
         this.size = size;
         this.grid = grid;
     },
-    getCell: function({cellX, cellY}) {
-        return this.grid[cellY][cellX];
+    getCellTerrain: function({cellX, cellY}) { /////////////////////////////
+        return this.grid[cellY][cellX].terrain; /////////////////////////////
     },
-    setCell: function({cellX, cellY}, imageType) {
-        this.grid[cellY][cellX] = imageType;
+    setCellTerrain: function({cellX, cellY}, imageType) { /////////////////////////////
+        this.grid[cellY][cellX].terrain = imageType; /////////////////////////////
+    },
+    getCellObject: function({cellX, cellY}) { /////////////////////////////
+        return this.grid[cellY][cellX].object; /////////////////////////////
+    },
+    setCellObject: function({cellX, cellY}, imageType) { /////////////////////////////
+        this.grid[cellY][cellX].object = imageType; /////////////////////////////
     },
     isCellInsideMap: function({cellX, cellY}) {
         return cellY < this.getGridSize() && cellY >= 0 && cellX < this.getGridSize() && cellX >= 0;

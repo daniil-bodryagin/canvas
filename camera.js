@@ -62,29 +62,43 @@ export const camera = {
                     const cellY = startCellX + startCellY + col + row;
                     const cellX = startCellX - startCellY + map.getSize() + col - row;
                     if (map.isCellInsideMap({cellX, cellY})) {
-                        const tileType = map.getCell({cellX, cellY});
-                        const tileImg = loader.terrainTiles[tileType];
+                        const tileType = map.getCellTerrain({cellX, cellY}); /////////////////////////////
+                        const tileImg = loader.getAsset(tileType); /////////////////////////////
                         const {imageX, imageY} = this.getCellCoordsForCanvas({cellX, cellY});
                         canvasCtx.drawImage(tileImg, imageX, imageY);
                         //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20);
+
+                        const objectType = map.getCellObject({cellX, cellY}); /////////////////////////////
+                        if (objectType) { /////////////////////////////
+                            const objectImg = loader.getAsset(objectType); /////////////////////////////
+                            const {imageX: imageX1, imageY: imageY1} = this.getCellCoordsForCanvas({cellX, cellY}); /////////////////////////////
+                            canvasCtx.drawImage(objectImg, imageX1, imageY1); /////////////////////////////
+                        }
                     }                    
                 }
                 for (let col = 0; col < tilesPerRow + 2; col++) {
                     const cellY = startCellX + startCellY + col + 1 + row;
                     const cellX = startCellX - startCellY + map.getSize() + col - row;
                     if (map.isCellInsideMap({cellX, cellY})) {
-                        const tileType = map.getCell({cellX, cellY});
-                        const tileImg = loader.terrainTiles[tileType];
+                        const tileType = map.getCellTerrain({cellX, cellY}); /////////////////////////////
+                        const tileImg = loader.getAsset(tileType); /////////////////////////////
                         const {imageX, imageY} = this.getCellCoordsForCanvas({cellX, cellY});
                         canvasCtx.drawImage(tileImg, imageX, imageY);
                         //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20);
+
+                        const objectType = map.getCellObject({cellX, cellY}); /////////////////////////////
+                        if (objectType) { /////////////////////////////
+                            const objectImg = loader.getAsset(objectType); /////////////////////////////
+                            const {imageX: imageX1, imageY: imageY1} = this.getCellCoordsForCanvas({cellX, cellY}); /////////////////////////////
+                            canvasCtx.drawImage(objectImg, imageX1, imageY1);///////////////////////////// 
+                        }
                     }
                 }
             }
             if (cursor.getImage() && map.isCellInsideMap(cursor.getCoords())) {
                 canvasCtx.globalAlpha = 0.5;
                 const {imageX, imageY} = this.getCellCoordsForCanvas(cursor.getCoords());
-                canvasCtx.drawImage(loader.terrainTiles[cursor.getImage()], imageX, imageY);
+                canvasCtx.drawImage(loader.getAsset(cursor.getImage()), imageX, imageY);
                 canvasCtx.globalAlpha = 1;
             }           
         }        

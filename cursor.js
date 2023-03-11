@@ -39,7 +39,7 @@ const cursorFunctions = {
                 if (cursor.isCellChanged(cellX, cellY)) {
                     cursor.setCoords(cellX, cellY);
                     if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) {
-                        map.setCell(cursor.getCoords(), cursor.getImage());
+                        map.setCellTerrain(cursor.getCoords(), cursor.getImage()); /////////////////////////////
                     }
                 }                
             }
@@ -48,7 +48,7 @@ const cursorFunctions = {
             if (!map.isEmpty()) {
                 cursor.isDragging = true;
                 if (map.isCellInsideMap(cursor.getCoords())) {
-                    map.setCell(cursor.getCoords(), cursor.getImage());
+                    map.setCellTerrain(cursor.getCoords(), cursor.getImage());
                 }
             }
         },
@@ -61,6 +61,38 @@ const cursorFunctions = {
             if (!map.isEmpty()) {
                 cursor.setCoords(Infinity, Infinity);
                 cursor.isDragging = false;
+            }
+        }
+    },
+    objects: { ///////////////////////////// 
+        mousemove: function({clientX, clientY}) {///////////////////////////// 
+            if (!map.isEmpty()) {/////////////////////////////
+                const {cellX, cellY} = camera.getCellUnderCursor(clientX, clientY); /////////////////////////////
+                if (cursor.isCellChanged(cellX, cellY)) { /////////////////////////////
+                    cursor.setCoords(cellX, cellY); /////////////////////////////
+                    if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) { /////////////////////////////
+                        map.setCellObject(cursor.getCoords(), cursor.getImage()); /////////////////////////////
+                    }
+                }                
+            }
+        },
+        mousedown: function() { /////////////////////////////
+            if (!map.isEmpty()) { /////////////////////////////
+                cursor.isDragging = true; /////////////////////////////
+                if (map.isCellInsideMap(cursor.getCoords())) { /////////////////////////////
+                    map.setCellObject(cursor.getCoords(), cursor.getImage()); /////////////////////////////
+                }
+            }
+        },
+        mouseup: function() { /////////////////////////////
+            if (!map.isEmpty()) { /////////////////////////////
+                cursor.isDragging = false; /////////////////////////////
+            }
+        },
+        mouseout: function () { /////////////////////////////
+            if (!map.isEmpty()) { /////////////////////////////
+                cursor.setCoords(Infinity, Infinity); /////////////////////////////
+                cursor.isDragging = false; /////////////////////////////
             }
         }
     },

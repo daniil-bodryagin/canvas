@@ -8,7 +8,7 @@ export const formActions = {
         for (let row = 0; row < size * 2 + 1; row++) {
             const mapRow = [];
             for (let col = 0; col < size * 2 + 1; col++) {
-                mapRow.push('img/terrain/sample_15.png');
+                mapRow.push({terrain: 'img/terrain/sample_15.png', object: ''}); /////////////////////////////
             }
             grid.push(mapRow);
         }
