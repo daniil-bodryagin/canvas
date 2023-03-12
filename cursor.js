@@ -15,10 +15,10 @@ export const cursor = {
         const cellY = this.cellY;
         return {cellX, cellY};
     },
-    setImage: function(assetName) {
+    setImageName: function(assetName) {
         this.assetName = assetName;
     },
-    getImage: function() {
+    getImageName: function() {
         return this.assetName;
     },
     setCursorMode: function(newMode, kind) {
@@ -40,7 +40,7 @@ const cursorFunctions = {
                 if (cursor.isCellChanged(cellX, cellY)) {
                     cursor.setCoords(cellX, cellY);
                     if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) {
-                        map.setCellContent(cursor.getCoords(), cursor.getImage(), cursor.layer);
+                        map.setCellContent(cursor.getCoords(), cursor.getImageName(), cursor.layer);
                     }
                 }                
             }
@@ -49,7 +49,7 @@ const cursorFunctions = {
             if (!map.isEmpty()) {
                 cursor.isDragging = true;
                 if (map.isCellInsideMap(cursor.getCoords())) {
-                    map.setCellContent(cursor.getCoords(), cursor.getImage(), cursor.layer);
+                    map.setCellContent(cursor.getCoords(), cursor.getImageName(), cursor.layer);
                 }
             }
         },

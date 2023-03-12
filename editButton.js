@@ -8,20 +8,28 @@ export const editActions = {
         $assetsList.innerHTML = '';
         for (let asset of assetSets[$targetMenuElement.dataset.kind]) {
             $assetsList.insertAdjacentHTML('beforeend', `
-            <input type="radio" name="asset-radio" id="${asset.name}" class="asset-radio" data-type="asset-select">
-            <label for="${asset.name}" class="asset-label"></label>
+            <div class="asset-record">
+                <input type="radio" name="asset-radio" id="${asset.name}" class="asset-radio" data-type="asset-select">
+                <label for="${asset.name}" class="asset-label">
+                    <div class="asset-image-container" id="${asset.name}-container"></div>
+                    <div class="asset-description">
+                        <p class="asset-title">${asset.title}</p>
+                        <p class="asset-size">L: ${asset.size.leftLength} R: ${asset.size.rightLength}</p>
+                    </div>
+                </label>
+            </div>
             `);
-            const $assetLabel = $assetsList.querySelector(`[for=${asset.name}]`);
-            const $assetImage = loader.getAssetImage(asset.name);
+            const $assetImageContainer = $assetsList.querySelector(`#${asset.name}-container`);
+            const $assetImage = loader.getAssetImage(asset.name).cloneNode();
             $assetImage.classList.add('asset-icon');
-            $assetLabel.append($assetImage)
+            $assetImageContainer.append($assetImage);
         }
         const $firstAsset = $assetsList.querySelector('input:first-child');
         $firstAsset.setAttribute('checked','checked');
-        cursor.setImage($firstAsset.id);
+        cursor.setImageName($firstAsset.id);
     },
     stop: function() {
-        cursor.setImage(null);
+        cursor.setImageName(null);
     }
 }
 

@@ -9,7 +9,7 @@ export const menuItemActions = {
 }
 
 function createMapList(panelName) {
-    fetch('http://127.0.0.1:8000')
+    fetch('http://127.0.0.1:8000/maps')
         .then(response => response.json())
         .then(mapList => {
             const $mapList = document.querySelector(`.${panelName} .map-list`);

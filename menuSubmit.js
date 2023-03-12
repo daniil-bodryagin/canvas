@@ -9,7 +9,7 @@ export const formActions = {
     open: function($menuForm) {
         const $selectedMap = $menuForm.querySelector('input:checked');
         if ($selectedMap) {
-            fetch(`http://127.0.0.1:8000/${$selectedMap.dataset.name}`)
+            fetch(`http://127.0.0.1:8000/maps/${$selectedMap.dataset.name}.json`)
             .then(response => response.json())
             .then(result => map.fill(JSON.parse(result)))
             .catch(error => console.log(`Server doesn't respond`));
@@ -17,7 +17,7 @@ export const formActions = {
     },
     save: function($menuForm) {
         if (!map.isEmpty()) {
-            fetch(`http://127.0.0.1:8000/${map.getName()}`, {
+            fetch(`http://127.0.0.1:8000/maps/${map.getName()}.json`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -29,16 +29,16 @@ export const formActions = {
         }
     },
     delete: function($menuForm) {
-        const $selectedMap = $menuForm.querySelector('input:checked');
+        const $selectedMapRadio = $menuForm.querySelector('input:checked');
         const $selectedMapLabel = $menuForm.querySelector('input:checked + label');
-        if ($selectedMap) {
-            fetch(`http://127.0.0.1:8000/${$selectedMap.dataset.name}`, {
+        if ($selectedMapRadio) {
+            fetch(`http://127.0.0.1:8000/maps/${$selectedMapRadio.dataset.name}.json`, {
                 method: 'DELETE'
             }).then(response => {
                 return response.json()
             }).then(result => alert(result.message)).catch(error => console.log(`Server doesn't respond`))
         }
-        $selectedMap.remove();
+        $selectedMapRadio.remove();
         $selectedMapLabel.remove();
     }
 }

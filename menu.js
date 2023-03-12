@@ -62,6 +62,6 @@ const menuActions = {
         $targetMenuElement.closest('.panel').classList.remove('show-panel');
     },
     'asset-select': function($targetMenuElement) {
-        cursor.setImage($targetMenuElement.id);
+        cursor.setImageName($targetMenuElement.id);
     }
 }

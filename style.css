@@ -105,25 +105,27 @@ html, body {
     width: 264px;
     height: 340px;
     overflow-x: auto;
-    display: flex;
-    align-content: start;
-    flex-wrap: wrap;
     margin-bottom: 8px;
     border: 1px solid gray;
-    background-color: black;
+    background-color: gainsboro;
+}
+
+.asset-record {
+    display: flex;
 }
 
 .asset-radio {
+    position: absolute;
     margin: 0;
     appearance: none;
 }
 
-.asset-radio:checked + .tile-label {
+.asset-radio:checked + .asset-label {
     background-color: gray;
 }
-
 .asset-label {
-    display: block;
+    display: flex;
+    flex-grow: 1;
     margin: 1px;
 }
 
@@ -131,8 +133,28 @@ html, body {
     outline: 1px solid white;
 }
 
+.asset-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 64px;
+    height: 52px;
+    background-color: black;
+}
+
 .asset-icon {
-    width: 100%;
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.asset-description {
+    padding: 8px;
+}
+
+.asset-title,
+.asset-size {
+    margin: 0;
 }
 
 .edit-button-selected {

@@ -16,17 +16,16 @@ const server = http.createServer(function(request, response) {
     response.end();
     return;
   } else if (request.method == 'PUT') {
-    console.log('PUT');
+    console.log('PUT', request.url);
     let body = '';
     request.on('data', function(data) {
       body += data;
     });
     request.on('end', function() {
-      console.log('Body: ');// + body);
+      //console.log('Body: ' + body);
       response.writeHead(200, headers);
-      const name = request.url.split('/');
       fs.writeFileSync(
-        `../maps/${name[name.length - 1]}.json`,
+        `../server${request.url}`,
         body,
         { encoding: "utf-8" }
       )
@@ -35,26 +34,24 @@ const server = http.createServer(function(request, response) {
     return;
   } else if (request.method == 'GET'){
     console.log('GET', request.url);
-    if (request.url == '/') {
-      const mapList = fs.readdirSync('../maps', {withFileTypes: true});
-      console.log(mapList);
-      mapList.sort(
-        (a, b) => a.name.localeCompare(b.name, "en")
-      );
-      console.log(mapList);
-      response.writeHead(200, headers);
-      response.end(JSON.stringify(mapList));
-    } else {
-      const map = fs.readFileSync(`../maps/${request.url}.json`, { encoding: "utf-8" });
-      response.writeHead(200, headers);
-      response.end(JSON.stringify(map));
-    }
+      if (request.url.endsWith('.json')) {
+          const file = fs.readFileSync(`../server${request.url}`, { encoding: "utf-8" });
+          response.writeHead(200, headers);
+          response.end(JSON.stringify(file));
+      } else {
+        const fileList = fs.readdirSync(`../server${request.url}`, {withFileTypes: true});
+        fileList.sort(
+          (a, b) => a.name.localeCompare(b.name, "en")
+        );
+        console.log(fileList);
+        response.writeHead(200, headers);
+        response.end(JSON.stringify(fileList));
+      }
     return;
   } else {
-    console.log('DELETE');
+    console.log('DELETE', request.url);
     response.writeHead(200, headers);
-    const name = request.url.split('/');
-    fs.rmSync(`../maps/${name[name.length - 1]}.json`);
+    fs.rmSync(`../server${request.url}`);
     response.end(JSON.stringify({message:'Map is deleted'}));
   }
   return;

@@ -45,10 +45,10 @@ export const camera = {
         const cellY = Math.ceil((cursorX + this.cameraCoords.x + 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIFTH) / CELL_WIDTH);
         return {cellX, cellY};
     },
-    getCellCoordsForCanvas: function({cellX, cellY}) {
-        const imageX = (cellY + (cellX - map.getSize()) - 1) * CELL_HALF_WIFTH - this.cameraCoords.x;
-        const imageY = (cellY - (cellX - map.getSize()) - 1) * CELL_HALF_HEIGHT - this.cameraCoords.y;
-        return {imageX, imageY};
+    getImageCoordsForCanvas: function({cellX, cellY}, assetImg) {
+        const imageX = (cellY + (cellX - map.getSize())) * CELL_HALF_WIFTH - this.cameraCoords.x - assetImg.width / 2;
+        const imageY = (cellY - (cellX - map.getSize()) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - assetImg.height;
+        return {imageX, imageY}; 
     },
     resize: function() {
         this.screenSize.height = document.documentElement.clientHeight;
@@ -60,8 +60,9 @@ export const camera = {
         const assetName = map.getCellContent({cellX, cellY}, layer);
         if (assetName) {
             const assetImg = loader.getAssetImage(assetName);
-            const {imageX, imageY} = this.getCellCoordsForCanvas({cellX, cellY});
+            const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, assetImg);
             canvasCtx.drawImage(assetImg, imageX, imageY);
+            //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
         }
     },
     drawRow: function(row, type) {
@@ -71,8 +72,7 @@ export const camera = {
             const cellX = this.startCell.x - this.startCell.y + map.getSize() + col - row;
             if (map.isCellInsideMap({cellX, cellY})) {
                 this.drawCell(cellX, cellY, 'terrain');
-                this.drawCell(cellX, cellY, 'object');
-                //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20);                        
+                this.drawCell(cellX, cellY, 'object');                       
             }                    
         }
     },
@@ -94,10 +94,11 @@ export const camera = {
                 this.drawRow(row, 'odd');
                 this.drawRow(row, 'even');
             }
-            if (cursor.getImage() && map.isCellInsideMap(cursor.getCoords())) {
+            if (cursor.getImageName() && map.isCellInsideMap(cursor.getCoords())) {
                 canvasCtx.globalAlpha = 0.5;
-                const {imageX, imageY} = this.getCellCoordsForCanvas(cursor.getCoords());
-                canvasCtx.drawImage(loader.getAssetImage(cursor.getImage()), imageX, imageY);
+                const assetImg = loader.getAssetImage(cursor.getImageName());
+                const {imageX, imageY} = this.getImageCoordsForCanvas(cursor.getCoords(), assetImg);
+                canvasCtx.drawImage(assetImg, imageX, imageY);
                 canvasCtx.globalAlpha = 1;
             }           
         }        
