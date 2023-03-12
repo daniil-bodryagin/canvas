@@ -20,7 +20,7 @@ export const editActions = {
             </div>
             `);
             const $assetImageContainer = $assetsList.querySelector(`#${asset.name}-container`);
-            const $assetImage = loader.getAssetImage(asset.name).cloneNode();
+            const $assetImage = loader.getAsset(asset.name).image.cloneNode();
             $assetImage.classList.add('asset-icon');
             $assetImageContainer.append($assetImage);
         }

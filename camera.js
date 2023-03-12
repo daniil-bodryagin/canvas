@@ -5,7 +5,7 @@ import { loader } from "./loader.js";
 const CELL_HEIGHT = 32;
 const CELL_WIDTH = 64;
 const CELL_HALF_HEIGHT = CELL_HEIGHT / 2;
-const CELL_HALF_WIFTH = CELL_WIDTH / 2;
+const CELL_HALF_WIDTH = CELL_WIDTH / 2;
 
 export const $canvas = document.querySelector('.canvas');
 const canvasCtx = $canvas.getContext('2d');
@@ -41,13 +41,13 @@ export const camera = {
         this.resize();
     },
     getCellUnderCursor: function(cursorX, cursorY) {
-        const cellX = map.getSize() + Math.ceil((cursorX + this.cameraCoords.x - 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIFTH) / CELL_WIDTH);
-        const cellY = Math.ceil((cursorX + this.cameraCoords.x + 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIFTH) / CELL_WIDTH);
+        const cellX = map.getSize() + Math.ceil((cursorX + this.cameraCoords.x - 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIDTH) / CELL_WIDTH);
+        const cellY = Math.ceil((cursorX + this.cameraCoords.x + 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIDTH) / CELL_WIDTH);
         return {cellX, cellY};
     },
-    getImageCoordsForCanvas: function({cellX, cellY}, assetImg) {
-        const imageX = (cellY + (cellX - map.getSize())) * CELL_HALF_WIFTH - this.cameraCoords.x - assetImg.width / 2;
-        const imageY = (cellY - (cellX - map.getSize()) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - assetImg.height;
+    getImageCoordsForCanvas: function({cellX, cellY}, asset) {
+        const imageX = (cellY + (cellX - map.getSize())) * CELL_HALF_WIDTH - this.cameraCoords.x - asset.image.width / 2 + (asset.size.leftLength - asset.size.rightLength) * CELL_HALF_WIDTH / 2;
+        const imageY = (cellY - (cellX - map.getSize()) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - asset.image.height;
         return {imageX, imageY}; 
     },
     resize: function() {
@@ -59,20 +59,19 @@ export const camera = {
     drawCell: function(cellX, cellY, layer) {
         const assetName = map.getCellContent({cellX, cellY}, layer);
         if (assetName) {
-            const assetImg = loader.getAssetImage(assetName);
-            const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, assetImg);
-            canvasCtx.drawImage(assetImg, imageX, imageY);
+            const asset = loader.getAsset(assetName);
+            const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, asset);
+            canvasCtx.drawImage(asset.image, imageX, imageY);
             //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
         }
     },
-    drawRow: function(row, type) {
+    drawRow: function(row, type, layer) {
         const rowLength = type == 'odd' ? this.screenCells.width + 3 : this.screenCells.width + 2;
         for (let col = 0; col < rowLength; col++) {
             const cellY = type == 'odd' ? this.startCell.x + this.startCell.y + col + row : this.startCell.x + this.startCell.y + col + 1 + row;
             const cellX = this.startCell.x - this.startCell.y + map.getSize() + col - row;
             if (map.isCellInsideMap({cellX, cellY})) {
-                this.drawCell(cellX, cellY, 'terrain');
-                this.drawCell(cellX, cellY, 'object');                       
+                this.drawCell(cellX, cellY, layer);                       
             }                    
         }
     },
@@ -91,14 +90,18 @@ export const camera = {
 
         if (!map.isEmpty()) {
             for (let row = 0; row < this.screenCells.height + 3; row++) {
-                this.drawRow(row, 'odd');
-                this.drawRow(row, 'even');
+                this.drawRow(row, 'odd', 'terrain');
+                this.drawRow(row, 'even', 'terrain');
+            }
+            for (let row = 0; row < this.screenCells.height + 3; row++) {
+                this.drawRow(row, 'odd', 'object');
+                this.drawRow(row, 'even', 'object');
             }
             if (cursor.getImageName() && map.isCellInsideMap(cursor.getCoords())) {
                 canvasCtx.globalAlpha = 0.5;
-                const assetImg = loader.getAssetImage(cursor.getImageName());
-                const {imageX, imageY} = this.getImageCoordsForCanvas(cursor.getCoords(), assetImg);
-                canvasCtx.drawImage(assetImg, imageX, imageY);
+                const asset = loader.getAsset(cursor.getImageName());
+                const {imageX, imageY} = this.getImageCoordsForCanvas(cursor.getCoords(), asset);
+                canvasCtx.drawImage(asset.image, imageX, imageY);
                 canvasCtx.globalAlpha = 1;
             }           
         }        

@@ -1,15 +1,16 @@
 export const loader = {
-    assetImages: {},
+    assetsSet: {},
     init: function(assetsList) {
         const tileLoadPromises = assetsList.map(asset => new Promise(resolve => {
+            this.assetsSet[asset.name] = asset;
             const assetImage = new Image();
             assetImage.src = asset.source;
-            this.assetImages[asset.name] = assetImage;              
+            this.assetsSet[asset.name].image = assetImage;              
             assetImage.onload = resolve;
         }));
         return Promise.all(tileLoadPromises);
     },
-    getAssetImage: function(assetName) {
-        return this.assetImages[assetName];
+    getAsset: function(assetName) {
+        return this.assetsSet[assetName];
     }
 }
