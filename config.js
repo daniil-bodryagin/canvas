@@ -1,5 +1,3 @@
-import { loader } from "./loader.js";
-
 const path = {
     terrains: 'img/terrains/',
     environmentals: 'img/environmentals/'
@@ -7,26 +5,28 @@ const path = {
 
 const create = {
     terrains: function(settings) {
-        const name = this.name;
-        const {...object} = {...settings};
-        object.getImage = function() {
-            return loader.getAsset(name).image;
+        return {
+            class: this,
+            properties: settings || this.defaultSettings,
+            getImage: function() {
+                return this.class.image;
+            },
+            getCellSize: function() {
+                return this.class.size;
+            }
         };
-        object.getCellSize = function() {
-            return loader.getAsset(name).size;
-        }
-        return object;
     },
     environmentals: function(settings) {
-        const name = this.name;
-        const {...object} = {...settings};
-        object.getImage = function() {
-            return loader.getAsset(name).image;
+        return {
+            class: this,
+            properties: settings || this.defaultSettings,
+            getImage: function() {
+                return this.class.image;
+            },
+            getCellSize: function() {
+                return this.class.size;
+            }
         };
-        object.getCellSize = function() {
-            return loader.getAsset(name).size;
-        }
-        return object;
     }
 }
 
@@ -39,9 +39,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_00.png`,
-        settings: {
-            name: 'yellow-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -52,9 +50,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_01.png`,
-        settings: {
-            name: 'orange-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -65,9 +61,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_02.png`,
-        settings: {
-            name: 'red-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -78,9 +72,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_03.png`,
-        settings: {
-            name: 'pink-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -91,9 +83,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_04.png`,
-        settings: {
-            name: 'hot-pink-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -104,9 +94,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_05.png`,
-        settings: {
-            name: 'purple-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -117,9 +105,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_06.png`,
-        settings: {
-            name: 'violet-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -130,9 +116,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_07.png`,
-        settings: {
-            name: 'dark-blue-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -143,9 +127,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_08.png`,
-        settings: {
-            name: 'blue-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -156,9 +138,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_09.png`,
-        settings: {
-            name: 'light-blue-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -169,9 +149,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_10.png`,
-        settings: {
-            name: 'deep-sky-blue-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -182,9 +160,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_11.png`,
-        settings: {
-            name: 'aquamarine-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -195,9 +171,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_12.png`,
-        settings: {
-            name: 'sea-green-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -208,9 +182,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_13.png`,
-        settings: {
-            name: 'green-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -221,9 +193,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_14.png`,
-        settings: {
-            name: 'light-green-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -234,9 +204,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_15.png`,
-        settings: {
-            name: 'dark-green-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -247,9 +215,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_16.png`,
-        settings: {
-            name: 'brown-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -260,9 +226,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_17.png`,
-        settings: {
-            name: 'maroon-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -273,9 +237,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_18.png`,
-        settings: {
-            name: 'teal-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -286,9 +248,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_19.png`,
-        settings: {
-            name: 'white-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -299,9 +259,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_20.png`,
-        settings: {
-            name: 'silver-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -312,9 +270,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_21.png`,
-        settings: {
-            name: 'light-gray-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -325,9 +281,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_22.png`,
-        settings: {
-            name: 'gray-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     },
     {
@@ -338,9 +292,7 @@ export const terrains = [
             rightLength: 1
         },
         source: `${path.terrains}sample_23.png`,
-        settings: {
-            name: 'dark-gray-tile'
-        },
+        defaultSettings: {},
         create: create.terrains
     }
 ]
@@ -354,9 +306,7 @@ export const environmentals = [
             rightLength: 1
         },
         source: `${path.environmentals}ball-orange.png`,
-        settings: {
-            name: 'orange-ball'
-        },
+        defaultSettings: {},
         create: create.environmentals
     },
     {
@@ -367,9 +317,7 @@ export const environmentals = [
             rightLength: 1
         },
         source: `${path.environmentals}ball-red.png`,
-        settings: {
-            name: 'red-ball'
-        },
+        defaultSettings: {},
         create: create.environmentals
     },
     {
@@ -380,9 +328,7 @@ export const environmentals = [
             rightLength: 1
         },
         source: `${path.environmentals}ball-teal.png`,
-        settings: {
-            name: 'teal-ball'
-        },
+        defaultSettings: {},
         create: create.environmentals
     },
     {
@@ -393,9 +339,7 @@ export const environmentals = [
             rightLength: 1
         },
         source: `${path.environmentals}ball-violet.png`,
-        settings: {
-            name: 'violet-ball'
-        },
+        defaultSettings: {},
         create: create.environmentals
     },
     {
@@ -406,9 +350,7 @@ export const environmentals = [
             rightLength: 3
         },
         source: `${path.environmentals}shit-pyramid.png`,
-        settings: {
-            name: 'shit-pyramid'
-        },
+        defaultSettings: {},
         create: create.environmentals
     },
     {
@@ -419,9 +361,7 @@ export const environmentals = [
             rightLength: 3
         },
         source: `${path.environmentals}brick.png`,
-        settings: {
-            name: 'brick'
-        },
+        defaultSettings: {},
         create: create.environmentals
     }
 ]

@@ -20,16 +20,16 @@ export const editActions = {
             </div>
             `);
             const $assetImageContainer = $assetsList.querySelector(`#${asset.name}-container`);
-            const $assetImage = loader.getAsset(asset.name).image.cloneNode();
+            const $assetImage = loader.getClass(asset.name).image.cloneNode();
             $assetImage.classList.add('asset-icon');
             $assetImageContainer.append($assetImage);
         }
         const $firstAsset = $assetsList.querySelector('input:first-child');
         $firstAsset.setAttribute('checked','checked');
-        cursor.setAsset(loader.getAsset($firstAsset.id));
+        cursor.setClass(loader.getClass($firstAsset.id));
     },
     stop: function() {
-        cursor.setAsset(null);
+        cursor.setClass(null);
     }
 }
 

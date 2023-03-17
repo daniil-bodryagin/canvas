@@ -19,8 +19,8 @@ export const map = {
         for (let row = 0; row < size * 2 + 1; row++) {
             const mapRow = [];
             for (let col = 0; col < size * 2 + 1; col++) {
-                const asset = loader.getAsset('dark-green-tile');
-                const terrain = asset.create(asset.settings);
+                const terrainClass = loader.getClass('dark-green-tile');
+                const terrain = terrainClass.create();
                 mapRow.push({terrain: terrain, object: null});
             }
             this.grid.push(mapRow);
@@ -32,12 +32,35 @@ export const map = {
         for (let row of grid) {
             const mapRow = [];
             for (let cell of row) {
-                const terrain = loader.getAsset(cell.terrain.name).create(cell.terrain);
-                const object = cell.object ? loader.getAsset(cell.object.name).create(cell.object) : null;
+                const terrain = loader.getClass(cell.terrain.class).create(cell.terrain.properties);
+                const object = cell.object.class ? loader.getClass(cell.object.class).create(cell.object.properties) : null;
                 mapRow.push({terrain: terrain, object: object});
             }
             this.grid.push(mapRow);
         }
+    },
+    createMapFile: function() {
+        const mapFile = {
+            name: this.name,
+            grid: []
+        };
+        for (let row of this.grid) {
+            const mapFileRow = [];
+            for (let cell of row) {
+                const terrain = {
+                    class: cell.terrain.class.name,
+                    properties: cell.terrain.properties
+                };
+                const object = {};
+                if (cell.object) {
+                    object.class = cell.object.class.name;
+                    object.properties = cell.object.properties;
+                };
+                mapFileRow.push({terrain: terrain, object: object});
+            }
+            mapFile.grid.push(mapFileRow);
+        }
+        return mapFile;
     },
     getCellContent: function({cellX, cellY}, layer) {
         return this.grid[cellY][cellX][layer];

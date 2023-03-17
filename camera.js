@@ -1,6 +1,5 @@
 import { map } from "./map.js";
 import { cursor } from "./cursor.js";
-import { loader } from "./loader.js";
 
 const CELL_HEIGHT = 32;
 const CELL_WIDTH = 64;
@@ -59,8 +58,9 @@ export const camera = {
     drawCell: function(cellX, cellY, layer) {
         const content = map.getCellContent({cellX, cellY}, layer);
         if (content) {
-            const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, content.getImage(), content.getCellSize());
-            canvasCtx.drawImage(content.getImage(), imageX, imageY);
+            const image = content.getImage();
+            const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, image, content.getCellSize());
+            canvasCtx.drawImage(image, imageX, imageY);
             //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
         }
     },
@@ -96,11 +96,12 @@ export const camera = {
                 this.drawRow(row, 'odd', 'object');
                 this.drawRow(row, 'even', 'object');
             }
-            if (cursor.getAsset() && map.isCellInsideMap(cursor.getCoords())) {
+            if (cursor.getClass() && map.isCellInsideMap(cursor.getCoords())) {
                 canvasCtx.globalAlpha = 0.5;
-                const asset = cursor.getAsset();
-                const {imageX, imageY} = this.getImageCoordsForCanvas(cursor.getCoords(), asset.image, asset.size);
-                canvasCtx.drawImage(asset.image, imageX, imageY);
+                const className = cursor.getClass();
+                const image = className.image;
+                const {imageX, imageY} = this.getImageCoordsForCanvas(cursor.getCoords(), image, className.size);
+                canvasCtx.drawImage(image, imageX, imageY);
                 canvasCtx.globalAlpha = 1;
             }           
         }        

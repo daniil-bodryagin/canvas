@@ -15,11 +15,11 @@ export const cursor = {
         const cellY = this.cellY;
         return {cellX, cellY};
     },
-    setAsset: function(asset) {
-        this.asset = asset;
+    setClass: function(className) {
+        this.class = className;
     },
-    getAsset: function() {
-        return this.asset;
+    getClass: function() {
+        return this.class;
     },
     setCursorMode: function(newMode, kind) {
         const events = Object.keys(cursorFunctions[newMode]);
@@ -40,8 +40,8 @@ const cursorFunctions = {
                 if (cursor.isCellChanged(cellX, cellY)) {
                     cursor.setCoords(cellX, cellY);
                     if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) {
-                        const asset = cursor.getAsset();
-                        map.setCellContent(cursor.getCoords(), asset.create(asset.settings), cursor.layer);
+                        const className = cursor.getClass();
+                        map.setCellContent(cursor.getCoords(), className.create(), cursor.layer);
                     }
                 }                
             }
@@ -50,8 +50,8 @@ const cursorFunctions = {
             if (!map.isEmpty()) {
                 cursor.isDragging = true;
                 if (map.isCellInsideMap(cursor.getCoords())) {
-                    const asset = cursor.getAsset();
-                    map.setCellContent(cursor.getCoords(), asset.create(asset.settings), cursor.layer);
+                    const className = cursor.getClass();
+                    map.setCellContent(cursor.getCoords(), className.create(), cursor.layer);
                 }
             }
         },

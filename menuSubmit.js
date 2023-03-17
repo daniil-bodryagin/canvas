@@ -1,3 +1,4 @@
+import { terrains } from './config.js';
 import { map } from './map.js';
 
 export const formActions = {
@@ -23,7 +24,7 @@ export const formActions = {
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
                 },
-                body: JSON.stringify(map)
+                body: JSON.stringify(map.createMapFile())
             }).then(response => {
                 return response.json()
             }).then(result => alert(result.message)).catch(error => console.log(`Server doesn't respond`));

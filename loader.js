@@ -1,16 +1,16 @@
 export const loader = {
-    assetsSet: {},
-    init: function(assetsList) {
-        const tileLoadPromises = assetsList.map(asset => new Promise(resolve => {
-            this.assetsSet[asset.name] = asset;
-            const assetImage = new Image();
-            assetImage.src = asset.source;
-            this.assetsSet[asset.name].image = assetImage;              
-            assetImage.onload = resolve;
+    classesSet: {},
+    init: function(classesList) {
+        const tileLoadPromises = classesList.map(className => new Promise(resolve => {
+            this.classesSet[className.name] = className;
+            const classImage = new Image();
+            classImage.src = className.source;
+            this.classesSet[className.name].image = classImage;         
+            classImage.onload = resolve;
         }));
         return Promise.all(tileLoadPromises);
     },
-    getAsset: function(assetName) {
-        return this.assetsSet[assetName];
+    getClass: function(className) {
+        return this.classesSet[className];
     }
 }

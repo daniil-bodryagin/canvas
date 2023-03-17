@@ -63,6 +63,6 @@ const menuActions = {
         $targetMenuElement.closest('.panel').classList.remove('show-panel');
     },
     'asset-select': function($targetMenuElement) {
-        cursor.setAsset(loader.getAsset($targetMenuElement.id));
+        cursor.setClass(loader.getClass($targetMenuElement.id));
     }
 }
