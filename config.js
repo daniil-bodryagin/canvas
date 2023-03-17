@@ -8,8 +8,8 @@ const create = {
         return {
             class: this,
             properties: settings || this.defaultSettings,
-            getImage: function() {
-                return this.class.image;
+            getImage: function({cellX, cellY}) {
+                return (this.properties.coords.cellX == cellX && this.properties.coords.cellY == cellY) ? this.class.image : null;
             },
             getCellSize: function() {
                 return this.class.size;
@@ -20,8 +20,8 @@ const create = {
         return {
             class: this,
             properties: settings || this.defaultSettings,
-            getImage: function() {
-                return this.class.image;
+            getImage: function({cellX, cellY}) {
+                return (this.properties.coords.cellX == cellX && this.properties.coords.cellY == cellY) ? this.class.image : null;
             },
             getCellSize: function() {
                 return this.class.size;

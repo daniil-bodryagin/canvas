@@ -58,9 +58,11 @@ export const camera = {
     drawCell: function(cellX, cellY, layer) {
         const content = map.getCellContent({cellX, cellY}, layer);
         if (content) {
-            const image = content.getImage();
-            const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, image, content.getCellSize());
-            canvasCtx.drawImage(image, imageX, imageY);
+            const image = content.getImage({cellX, cellY});
+            if (image) {
+                const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, image, content.getCellSize());
+                canvasCtx.drawImage(image, imageX, imageY);
+            }
             //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
         }
     },

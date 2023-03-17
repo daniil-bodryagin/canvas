@@ -41,7 +41,7 @@ const cursorFunctions = {
                     cursor.setCoords(cellX, cellY);
                     if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) {
                         const className = cursor.getClass();
-                        map.setCellContent(cursor.getCoords(), className.create(), cursor.layer);
+                        map.setCellContent(cursor.getCoords(), className.create({coords: cursor.getCoords()}), cursor.layer);
                     }
                 }                
             }
@@ -51,7 +51,7 @@ const cursorFunctions = {
                 cursor.isDragging = true;
                 if (map.isCellInsideMap(cursor.getCoords())) {
                     const className = cursor.getClass();
-                    map.setCellContent(cursor.getCoords(), className.create(), cursor.layer);
+                    map.setCellContent(cursor.getCoords(), className.create({coords: cursor.getCoords()}), cursor.layer);
                 }
             }
         },

@@ -20,7 +20,7 @@ export const map = {
             const mapRow = [];
             for (let col = 0; col < size * 2 + 1; col++) {
                 const terrainClass = loader.getClass('dark-green-tile');
-                const terrain = terrainClass.create();
+                const terrain = terrainClass.create({coords: {cellX: col, cellY: row}});
                 mapRow.push({terrain: terrain, object: null});
             }
             this.grid.push(mapRow);
@@ -65,8 +65,12 @@ export const map = {
     getCellContent: function({cellX, cellY}, layer) {
         return this.grid[cellY][cellX][layer];
     },
-    setCellContent: function({cellX, cellY}, assetName, layer) {
-        this.grid[cellY][cellX][layer] = assetName;
+    setCellContent: function({cellX, cellY}, className, layer) {
+        for (let y = cellY - className.class.size.rightLength + 1; y <= cellY; y++) {
+            for (let x = cellX; x < cellX + className.class.size.leftLength; x++) {
+                this.grid[y][x][layer] = className;
+            }
+        }
     },
     isCellInsideMap: function({cellX, cellY}) {
         return cellY < this.getGridSize() && cellY >= 0 && cellX < this.getGridSize() && cellX >= 0;
