@@ -45,9 +45,9 @@ export const camera = {
         const cellY = Math.ceil((cursorX + this.cameraCoords.x + 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIDTH) / CELL_WIDTH);
         return {cellX, cellY};
     },
-    getImageCoordsForCanvas: function({cellX, cellY}, asset) {
-        const imageX = (cellY + (cellX - map.getSize())) * CELL_HALF_WIDTH - this.cameraCoords.x - asset.image.width / 2 + (asset.size.leftLength - asset.size.rightLength) * CELL_HALF_WIDTH / 2;
-        const imageY = (cellY - (cellX - map.getSize()) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - asset.image.height;
+    getImageCoordsForCanvas: function({cellX, cellY}, image, {leftLength, rightLength}) {
+        const imageX = (cellY + (cellX - map.getSize())) * CELL_HALF_WIDTH - this.cameraCoords.x - image.width / 2 + (leftLength - rightLength) * CELL_HALF_WIDTH / 2;
+        const imageY = (cellY - (cellX - map.getSize()) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - image.height;
         return {imageX, imageY}; 
     },
     resize: function() {
@@ -57,11 +57,10 @@ export const camera = {
         $canvas.setAttribute('width', this.screenSize.width);
     },
     drawCell: function(cellX, cellY, layer) {
-        const assetName = map.getCellContent({cellX, cellY}, layer);
-        if (assetName) {
-            const asset = loader.getAsset(assetName);
-            const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, asset);
-            canvasCtx.drawImage(asset.image, imageX, imageY);
+        const content = map.getCellContent({cellX, cellY}, layer);
+        if (content) {
+            const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, content.getImage(), content.getCellSize());
+            canvasCtx.drawImage(content.getImage(), imageX, imageY);
             //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
         }
     },
@@ -97,10 +96,10 @@ export const camera = {
                 this.drawRow(row, 'odd', 'object');
                 this.drawRow(row, 'even', 'object');
             }
-            if (cursor.getImageName() && map.isCellInsideMap(cursor.getCoords())) {
+            if (cursor.getAsset() && map.isCellInsideMap(cursor.getCoords())) {
                 canvasCtx.globalAlpha = 0.5;
-                const asset = loader.getAsset(cursor.getImageName());
-                const {imageX, imageY} = this.getImageCoordsForCanvas(cursor.getCoords(), asset);
+                const asset = cursor.getAsset();
+                const {imageX, imageY} = this.getImageCoordsForCanvas(cursor.getCoords(), asset.image, asset.size);
                 canvasCtx.drawImage(asset.image, imageX, imageY);
                 canvasCtx.globalAlpha = 1;
             }           

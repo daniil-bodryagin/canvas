@@ -12,12 +12,13 @@ export const formActions = {
             fetch(`http://127.0.0.1:8000/maps/${$selectedMap.dataset.name}.json`)
             .then(response => response.json())
             .then(result => map.fill(JSON.parse(result)))
-            .catch(error => console.log(`Server doesn't respond`));
+            // .catch(error => console.log(`Server doesn't respond`));
         }
     },
     save: function($menuForm) {
+        const name = $menuForm.querySelector('#name-save').value;
         if (!map.isEmpty()) {
-            fetch(`http://127.0.0.1:8000/maps/${map.getName()}.json`, {
+            fetch(`http://127.0.0.1:8000/maps/${name}.json`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'

@@ -15,11 +15,11 @@ export const cursor = {
         const cellY = this.cellY;
         return {cellX, cellY};
     },
-    setImageName: function(assetName) {
-        this.assetName = assetName;
+    setAsset: function(asset) {
+        this.asset = asset;
     },
-    getImageName: function() {
-        return this.assetName;
+    getAsset: function() {
+        return this.asset;
     },
     setCursorMode: function(newMode, kind) {
         const events = Object.keys(cursorFunctions[newMode]);
@@ -27,7 +27,7 @@ export const cursor = {
             $canvas.removeEventListener(event, cursorFunctions[this.mode][event]);
             $canvas.addEventListener(event, cursorFunctions[newMode][event]);
         }
-        this.layer = kind == 'terrain' ? 'terrain' : 'object';
+        this.layer = kind == 'terrains' ? 'terrain' : 'object';
         this.mode = newMode;
     }
 };
@@ -40,7 +40,8 @@ const cursorFunctions = {
                 if (cursor.isCellChanged(cellX, cellY)) {
                     cursor.setCoords(cellX, cellY);
                     if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) {
-                        map.setCellContent(cursor.getCoords(), cursor.getImageName(), cursor.layer);
+                        const asset = cursor.getAsset();
+                        map.setCellContent(cursor.getCoords(), asset.create(asset.settings), cursor.layer);
                     }
                 }                
             }
@@ -49,7 +50,8 @@ const cursorFunctions = {
             if (!map.isEmpty()) {
                 cursor.isDragging = true;
                 if (map.isCellInsideMap(cursor.getCoords())) {
-                    map.setCellContent(cursor.getCoords(), cursor.getImageName(), cursor.layer);
+                    const asset = cursor.getAsset();
+                    map.setCellContent(cursor.getCoords(), asset.create(asset.settings), cursor.layer);
                 }
             }
         },

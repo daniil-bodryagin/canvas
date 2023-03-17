@@ -26,10 +26,10 @@ export const editActions = {
         }
         const $firstAsset = $assetsList.querySelector('input:first-child');
         $firstAsset.setAttribute('checked','checked');
-        cursor.setImageName($firstAsset.id);
+        cursor.setAsset(loader.getAsset($firstAsset.id));
     },
     stop: function() {
-        cursor.setImageName(null);
+        cursor.setAsset(null);
     }
 }
 

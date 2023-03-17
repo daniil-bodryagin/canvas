@@ -2,6 +2,7 @@ import { cursor } from './cursor.js';
 import { menuItemActions } from './menuItem.js';
 import { editActions } from './editButton.js';
 import { formActions } from './menuSubmit.js';
+import { loader } from './loader.js';
 
 const $menu = document.querySelector('.menu');
 const $menuItems = $menu.querySelectorAll('.menu-item');
@@ -62,6 +63,6 @@ const menuActions = {
         $targetMenuElement.closest('.panel').classList.remove('show-panel');
     },
     'asset-select': function($targetMenuElement) {
-        cursor.setImageName($targetMenuElement.id);
+        cursor.setAsset(loader.getAsset($targetMenuElement.id));
     }
 }
