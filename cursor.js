@@ -3,6 +3,7 @@ import { map } from "./map.js";
 
 export const cursor = {
     mode: 'stop',
+    obstacles: null,
     isCellChanged: function(cellX, cellY) {
         return cellX != this.cellX || cellY != this.cellY;
     },
@@ -32,6 +33,14 @@ export const cursor = {
     }
 };
 
+const placeObject = function() {
+    const className = cursor.getClass();
+    const object = className.create({coords: cursor.getCoords()});
+    map.setCellContent(cursor.getCoords(), object, cursor.layer);
+    map.addToList(object);
+
+}
+
 const cursorFunctions = {
     assets: {
         mousemove: function({clientX, clientY}) {
@@ -39,23 +48,18 @@ const cursorFunctions = {
                 const {cellX, cellY} = camera.getCellUnderCursor(clientX, clientY);
                 if (cursor.isCellChanged(cellX, cellY)) {
                     cursor.setCoords(cellX, cellY);
-                    if (cursor.isDragging && map.isCellInsideMap(cursor.getCoords())) {
-                        const className = cursor.getClass();
-                        const object = className.create({coords: cursor.getCoords()});
-                        map.setCellContent(cursor.getCoords(), object, cursor.layer);
-                        map.addToList(object);
-                    }
+                    cursor.obstacles = map.getObstacles(cursor.getCoords(), cursor.getClass());
+                    if (cursor.isDragging && !cursor.obstacles) {
+                        placeObject();
+                    } 
                 }                
             }
         },
         mousedown: function() {
             if (!map.isEmpty()) {
                 cursor.isDragging = true;
-                if (map.isCellInsideMap(cursor.getCoords())) {
-                    const className = cursor.getClass();
-                    const object = className.create({coords: cursor.getCoords()});
-                    map.setCellContent(cursor.getCoords(), object, cursor.layer);
-                    map.addToList(object);
+                if (!cursor.obstacles) {
+                    placeObject();
                 }
             }
         },

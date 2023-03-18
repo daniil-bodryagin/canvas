@@ -1,5 +1,6 @@
 import { map } from "./map.js";
 import { cursor } from "./cursor.js";
+import { loader } from "./loader.js";
 
 const CELL_HEIGHT = 32;
 const CELL_WIDTH = 64;
@@ -112,6 +113,14 @@ export const camera = {
                 const image = className.image;
                 const {imageX, imageY} = this.getImageCoordsForCanvas(cursor.getCoords(), image, className.size);
                 canvasCtx.drawImage(image, imageX, imageY);
+                if (cursor.obstacles) {
+                    for (let obstacleCoords of cursor.obstacles) {
+                        const obstacleClass = loader.getClass('obstacle');
+                        const obstacleImage = obstacleClass.image;
+                        const {imageX, imageY} = this.getImageCoordsForCanvas(obstacleCoords, obstacleImage, obstacleClass.size);
+                        canvasCtx.drawImage(obstacleImage, imageX, imageY);
+                    }
+                }
                 canvasCtx.globalAlpha = 1;
             }           
         }        

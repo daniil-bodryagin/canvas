@@ -1,6 +1,7 @@
 const path = {
     terrains: 'img/terrains/',
-    environmentals: 'img/environmentals/'
+    environmentals: 'img/environmentals/',
+    hud: 'img/hud/'
 }
 
 const create = {
@@ -366,7 +367,18 @@ export const environmentals = [
     }
 ]
 
-export const fullSet = [...terrains, ...environmentals];
+export const hud = [
+    {
+        name: 'obstacle',
+        size: {
+            leftLength: 1,
+            rightLength: 1
+        },
+        source: `${path.hud}obstacle.png`
+    }
+]
+
+export const fullSet = [...terrains, ...environmentals, ...hud];
 
 export const assetSets = {
     terrains: terrains,

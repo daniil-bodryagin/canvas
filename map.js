@@ -81,6 +81,17 @@ export const map = {
             }
         }
     },
+    getObstacles: function({cellX, cellY}, className) {
+        const obstacles = [];
+        for (let row = cellY; row > cellY - className.size.rightLength; row--) {
+            for (let col = cellX; col < cellX + className.size.leftLength; col++) {
+                if (!this.isCellInsideMap({cellX: col, cellY: row}) || this.grid[row][col].object) {
+                    obstacles.push({cellX: col, cellY: row});
+                }
+            }
+        }
+        return obstacles.length ? obstacles : null;
+    },
     addToList: function(object) {
         this.listOfAllObjects.push(object);
     },
