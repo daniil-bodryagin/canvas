@@ -51,6 +51,12 @@ export const camera = {
         const imageY = (cellY - (cellX - map.getSize()) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - image.height;
         return {imageX, imageY}; 
     },
+    isImageVisible: function(image, {imageX, imageY}) {
+        return ((imageX >= 0 && imageX <= this.screenSize.width) || 
+                (imageX + image.width >= 0 && imageX + image.width <= this.screenSize.width)) &&
+                ((imageY >= 0 && imageY <= this.screenSize.height) || 
+                (imageY + image.height >= 0 && imageY + image.height <= this.screenSize.height));
+    },
     resize: function() {
         this.screenSize.height = document.documentElement.clientHeight;
         this.screenSize.width = document.documentElement.clientWidth;
@@ -63,16 +69,14 @@ export const camera = {
             const image = content.getImage({cellX, cellY});
             if (image) {
                 const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, image, content.getCellSize());
-                canvasCtx.drawImage(image, imageX, imageY);
+                if (this.isImageVisible(image, {imageX, imageY})) canvasCtx.drawImage(image, imageX, imageY);
             }
             //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
         }
     },
     drawRow: function(row, type, layer) {
         const rowLength = type == 'odd' ? this.screenCells.width + 3 : this.screenCells.width + 2;
-        const startCol = layer == 'object' ? 0 : -MAX_OBJECT_WIDTH;
-        const endCol = layer == 'object' ? rowLength : rowLength + MAX_OBJECT_WIDTH;
-        for (let col = startCol; col < endCol; col++) {
+        for (let col = -MAX_OBJECT_WIDTH; col < rowLength + MAX_OBJECT_WIDTH; col++) {
             const cellY = type == 'odd' ? this.startCell.x + this.startCell.y + col + row : this.startCell.x + this.startCell.y + col + 1 + row;
             const cellX = this.startCell.x - this.startCell.y + map.getSize() + col - row;
             if (map.isCellInsideMap({cellX, cellY})) {
@@ -94,7 +98,7 @@ export const camera = {
         //canvasCtx.strokeStyle = "white"
 
         if (!map.isEmpty()) {
-            for (let row = 0; row < this.screenCells.height + 3; row++) {
+            for (let row = 0; row < this.screenCells.height + 3 + MAX_OBJECT_HEIGHT; row++) {
                 this.drawRow(row, 'odd', 'terrain');
                 this.drawRow(row, 'even', 'terrain');
             }
