@@ -5,6 +5,8 @@ const CELL_HEIGHT = 32;
 const CELL_WIDTH = 64;
 const CELL_HALF_HEIGHT = CELL_HEIGHT / 2;
 const CELL_HALF_WIDTH = CELL_WIDTH / 2;
+const MAX_OBJECT_WIDTH = 10;
+const MAX_OBJECT_HEIGHT = 30;
 
 export const $canvas = document.querySelector('.canvas');
 const canvasCtx = $canvas.getContext('2d');
@@ -68,7 +70,9 @@ export const camera = {
     },
     drawRow: function(row, type, layer) {
         const rowLength = type == 'odd' ? this.screenCells.width + 3 : this.screenCells.width + 2;
-        for (let col = 0; col < rowLength; col++) {
+        const startCol = layer == 'object' ? 0 : -MAX_OBJECT_WIDTH;
+        const endCol = layer == 'object' ? rowLength : rowLength + MAX_OBJECT_WIDTH;
+        for (let col = startCol; col < endCol; col++) {
             const cellY = type == 'odd' ? this.startCell.x + this.startCell.y + col + row : this.startCell.x + this.startCell.y + col + 1 + row;
             const cellX = this.startCell.x - this.startCell.y + map.getSize() + col - row;
             if (map.isCellInsideMap({cellX, cellY})) {
@@ -94,7 +98,7 @@ export const camera = {
                 this.drawRow(row, 'odd', 'terrain');
                 this.drawRow(row, 'even', 'terrain');
             }
-            for (let row = 0; row < this.screenCells.height + 3; row++) {
+            for (let row = 0; row < this.screenCells.height + 3 + MAX_OBJECT_HEIGHT; row++) {
                 this.drawRow(row, 'odd', 'object');
                 this.drawRow(row, 'even', 'object');
             }
