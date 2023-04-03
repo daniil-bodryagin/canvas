@@ -29,6 +29,8 @@ export const editActions = {
         cursor.setClass(loader.getClass($firstAsset.id));
     },
     stop: function() {
+        const $assetsList = document.querySelector('.asset-list');
+        $assetsList.innerHTML = '';
         cursor.setClass(null);
     }
 }
