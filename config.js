@@ -4,13 +4,30 @@ const path = {
     hud: 'img/hud/'
 }
 
+function getDelta({cellY: baseCellY}, currentCellY) {
+    const dCellsX = this.size.rightLength - (baseCellY - currentCellY + 1);
+    const dCellsY = baseCellY - currentCellY + 1;
+    const dCellsHeight = this.size.rightLength;
+    return {dCellsX, dCellsY, dCellsHeight};
+}
+
 const create = {
     terrains: function(settings) {
         return {
             class: this,
             properties: settings || this.defaultSettings,
-            getImage: function({cellX, cellY}) {
-                return (this.properties.coords.cellX == cellX && this.properties.coords.cellY == cellY) ? this.class.image : null;
+            getImageWithOffsets: function({cellX}) {
+                return (this.properties.coords.cellX == cellX) 
+                        ? {
+                            image: this.class.image,
+                            offsetX: this.class.offset.x,
+                            offsetY: this.class.offset.y
+                        } 
+                        : {
+                            image: null,
+                            offsetX: null,
+                            offsetY: null
+                        };
             },
             getCellSize: function() {
                 return this.class.size;
@@ -21,8 +38,24 @@ const create = {
         return {
             class: this,
             properties: settings || this.defaultSettings,
-            getImage: function({cellX, cellY}) {
-                return (this.properties.coords.cellX == cellX && this.properties.coords.cellY == cellY) ? this.class.image : null;
+            getImageWithOffsets: function({cellX}) {
+                return (this.properties.coords.cellX == cellX) 
+                        ? {
+                            image: this.class.image,
+                            offsetX: this.class.offset.x,
+                            offsetY: this.class.offset.y
+                        } 
+                        : {
+                            image: null,
+                            offsetX: null,
+                            offsetY: null
+                        };
+            },
+            getDelta: function(cellY) {
+                const dCellsX = this.class.size.rightLength - (this.properties.coords.cellY - cellY + 1);
+                const dCellsY = this.properties.coords.cellY - cellY + 1;
+                const dCellsHeight = this.class.size.rightLength;
+                return {dCellsX, dCellsY, dCellsHeight};
             },
             getCellSize: function() {
                 return this.class.size;
@@ -39,9 +72,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_00.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'orange-tile',
@@ -50,9 +88,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_01.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'red-tile',
@@ -61,9 +104,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_02.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'pink-tile',
@@ -72,9 +120,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_03.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'hot-pink-tile',
@@ -83,9 +136,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_04.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'purple-tile',
@@ -94,9 +152,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_05.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'violet-tile',
@@ -105,9 +168,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_06.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'dark-blue-tile',
@@ -116,9 +184,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_07.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'blue-tile',
@@ -127,9 +200,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_08.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'light-blue-tile',
@@ -138,9 +216,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_09.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'deep-sky-blue-tile',
@@ -149,9 +232,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_10.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'aquamarine-tile',
@@ -160,9 +248,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_11.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'sea-green-tile',
@@ -171,9 +264,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_12.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'green-tile',
@@ -182,9 +280,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_13.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'light-green-tile',
@@ -193,9 +296,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_14.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'dark-green-tile',
@@ -204,9 +312,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_15.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'brown-tile',
@@ -215,9 +328,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_16.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'maroon-tile',
@@ -226,9 +344,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_17.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'teal-tile',
@@ -237,9 +360,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_18.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'white-tile',
@@ -248,9 +376,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_19.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'silver-tile',
@@ -259,9 +392,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_20.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'light-gray-tile',
@@ -270,9 +408,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_21.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'gray-tile',
@@ -281,9 +424,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_22.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     },
     {
         name: 'dark-gray-tile',
@@ -292,9 +440,14 @@ export const terrains = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.terrains}sample_23.png`,
         defaultSettings: {},
-        create: create.terrains
+        create: create.terrains,
+        getDelta: getDelta
     }
 ]
 
@@ -306,9 +459,14 @@ export const environmentals = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 7,
+            y: 9
+        },
         source: `${path.environmentals}ball-orange.png`,
         defaultSettings: {},
-        create: create.environmentals
+        create: create.environmentals,
+        getDelta: getDelta
     },
     {
         name: 'red-ball',
@@ -317,9 +475,14 @@ export const environmentals = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 7,
+            y: 9
+        },
         source: `${path.environmentals}ball-red.png`,
         defaultSettings: {},
-        create: create.environmentals
+        create: create.environmentals,
+        getDelta: getDelta
     },
     {
         name: 'teal-ball',
@@ -328,9 +491,14 @@ export const environmentals = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 7,
+            y: 9
+        },
         source: `${path.environmentals}ball-teal.png`,
         defaultSettings: {},
-        create: create.environmentals
+        create: create.environmentals,
+        getDelta: getDelta
     },
     {
         name: 'violet-ball',
@@ -339,9 +507,14 @@ export const environmentals = [
             leftLength: 1,
             rightLength: 1
         },
+        offset: {
+            x: 7,
+            y: 9
+        },
         source: `${path.environmentals}ball-violet.png`,
         defaultSettings: {},
-        create: create.environmentals
+        create: create.environmentals,
+        getDelta: getDelta
     },
     {
         name: 'shit-pyramid',
@@ -350,9 +523,14 @@ export const environmentals = [
             leftLength: 3,
             rightLength: 3
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.environmentals}shit-pyramid.png`,
         defaultSettings: {},
-        create: create.environmentals
+        create: create.environmentals,
+        getDelta: getDelta
     },
     {
         name: 'brick',
@@ -361,9 +539,14 @@ export const environmentals = [
             leftLength: 2,
             rightLength: 3
         },
+        offset: {
+            x: 0,
+            y: 0
+        },
         source: `${path.environmentals}brick.png`,
         defaultSettings: {},
-        create: create.environmentals
+        create: create.environmentals,
+        getDelta: getDelta
     }
 ]
 
@@ -374,7 +557,12 @@ export const hud = [
             leftLength: 1,
             rightLength: 1
         },
-        source: `${path.hud}obstacle.png`
+        offset: {
+            x: 0,
+            y: 0
+        },
+        source: `${path.hud}obstacle.png`,
+        getDelta: getDelta
     }
 ]
 

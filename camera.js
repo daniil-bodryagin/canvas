@@ -47,10 +47,14 @@ export const camera = {
         const cellY = Math.ceil((cursorX + this.cameraCoords.x + 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIDTH) / CELL_WIDTH);
         return {cellX, cellY};
     },
-    getImageCoordsForCanvas: function({cellX, cellY}, image, {leftLength, rightLength}) {
-        const imageX = (cellY + (cellX - map.getSize())) * CELL_HALF_WIDTH - this.cameraCoords.x - image.width / 2 + (leftLength - rightLength) * CELL_HALF_WIDTH / 2;
-        const imageY = (cellY - (cellX - map.getSize()) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - image.height;
-        return {imageX, imageY}; 
+    getImageCoordsForCanvas: function({cellX, cellY}, image, offsetX, offsetY, {dCellsX, dCellsY, dCellsHeight}) {
+        const dx = dCellsX * CELL_HALF_WIDTH;
+        const dy = (dCellsY == dCellsHeight) ? 0 : image.height - dCellsY * CELL_HALF_HEIGHT;
+        const dWidth = image.width - dCellsX * CELL_HALF_HEIGHT;
+        const dHeight = (dCellsY == dCellsHeight) ? image.height - (dCellsHeight - 1) * CELL_HALF_HEIGHT : CELL_HALF_HEIGHT;
+        const imageX = (cellY + (cellX - map.getSize()) - 1) * CELL_HALF_WIDTH - this.cameraCoords.x + offsetX;
+        const imageY = (cellY - (cellX - map.getSize()) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - dHeight - offsetY;
+        return {dx, dy, dWidth, dHeight, imageX, imageY};
     },
     isImageVisible: function(image, {imageX, imageY}) {
         return ((imageX >= 0 && imageX <= this.screenSize.width) || 
@@ -67,12 +71,13 @@ export const camera = {
     drawCell: function(cellX, cellY, layer) {
         const content = map.getCellContent({cellX, cellY}, layer);
         if (content) {
-            const image = content.getImage({cellX, cellY});
+            const {image, offsetX, offsetY} = content.getImageWithOffsets({cellX, cellY});
             if (image) {
-                const {imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, image, content.getCellSize());
-                if (this.isImageVisible(image, {imageX, imageY})) canvasCtx.drawImage(image, imageX, imageY);
+                const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, image, offsetX, offsetY, content.class.getDelta(content.properties.coords, cellY));
+                if (this.isImageVisible(image, {imageX, imageY})) canvasCtx.drawImage(image, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
+
+                //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
             }
-            //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
         }
     },
     drawRow: function(row, type, layer) {
@@ -111,14 +116,20 @@ export const camera = {
                 canvasCtx.globalAlpha = 0.5;
                 const className = cursor.getClass();
                 const image = className.image;
-                const {imageX, imageY} = this.getImageCoordsForCanvas(cursor.getCoords(), image, className.size);
-                canvasCtx.drawImage(image, imageX, imageY);
+                const {cellX, cellY} = cursor.getCoords();
+                for (let row = className.size.rightLength - 1; row >= 0; row--) {
+                    const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY: cellY - row}, image, className.offset.x, className.offset.y, className.getDelta({cellX, cellY}, cellY - row));
+                    canvasCtx.drawImage(image, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
+                }
                 if (cursor.obstacles) {
+                    const obstacleClass = loader.getClass('obstacle');
+                    const obstacleImage = obstacleClass.image;
                     for (let obstacleCoords of cursor.obstacles) {
-                        const obstacleClass = loader.getClass('obstacle');
-                        const obstacleImage = obstacleClass.image;
-                        const {imageX, imageY} = this.getImageCoordsForCanvas(obstacleCoords, obstacleImage, obstacleClass.size);
-                        canvasCtx.drawImage(obstacleImage, imageX, imageY);
+                        const {cellX, cellY} = obstacleCoords;
+                        for (let row = obstacleClass.size.rightLength - 1; row >=0; row--) {
+                            const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, obstacleImage, obstacleClass.offset.x, obstacleClass.offset.y, obstacleClass.getDelta({cellX, cellY}, cellY - row));
+                            canvasCtx.drawImage(obstacleImage, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
+                        }
                     }
                 }
                 canvasCtx.globalAlpha = 1;
