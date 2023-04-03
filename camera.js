@@ -33,7 +33,7 @@ export const camera = {
         x: 0,
         y: 0
     },
-    cameraSpeedLimit: 50,
+    cameraSpeedLimit: 150,
     init: function() {
         window.addEventListener('resize', () => {
             this.resize();
@@ -76,7 +76,7 @@ export const camera = {
                 const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, image, offsetX, offsetY, content.class.getDelta(content.properties.coords, cellY));
                 if (this.isImageVisible(image, {imageX, imageY})) canvasCtx.drawImage(image, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
 
-                canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
+                //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
             }
         }
     },
@@ -91,8 +91,10 @@ export const camera = {
         }
     },
     drawScene: function(deltaTime) {
-        this.cameraCoords.x += Math.floor(this.cameraSpeed.x * deltaTime);
-        this.cameraCoords.y += Math.floor(this.cameraSpeed.y * deltaTime);
+        const newCameraX = this.cameraCoords.x + Math.floor(this.cameraSpeed.x * deltaTime);
+        const newCameraY = this.cameraCoords.y + Math.floor(this.cameraSpeed.y * deltaTime);
+        if (!map.isEmpty() && newCameraX >= 0 && newCameraX <= map.size.width * CELL_WIDTH - this.screenSize.width) this.cameraCoords.x = newCameraX;
+        if (!map.isEmpty() && newCameraY >= 0 && newCameraY <= map.size.height * CELL_HEIGHT - this.screenSize.height) this.cameraCoords.y = newCameraY;
         //console.log(cameraCoords.x, cameraCoords.y);
         canvasCtx.fillRect(0, 0, this.screenSize.width, this.screenSize.height);
 
@@ -101,7 +103,7 @@ export const camera = {
         this.startCell.x = Math.floor(this.cameraCoords.x / CELL_WIDTH);
         this.startCell.y = Math.floor(this.cameraCoords.y / CELL_HEIGHT);
 
-        canvasCtx.strokeStyle = "white"
+        //canvasCtx.strokeStyle = "white"
 
         if (!map.isEmpty()) {
             for (let row = 0; row < this.screenCells.height + 3 + MAX_OBJECT_HEIGHT; row++) {
