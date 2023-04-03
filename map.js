@@ -8,38 +8,48 @@ export const map = {
         return this.name;
     },
     getSize: function() {
-        return (this.grid.length - 1) / 2;
+        return this.size;
     },
     getGridSize: function() {
         return this.grid.length;
     },
     new: function(name, size) {
         this.name = name;
+        this.size = size;
         this.grid = [];
         this.listOfAllObjects = [];
-        for (let row = 0; row < size * 2 + 1; row++) {
+        for (let row = 0; row < this.size * 2 + 1; row++) {
             const mapRow = [];
-            for (let col = 0; col < size * 2 + 1; col++) {
-                const terrainClass = loader.getClass('dark-green-tile');
-                const terrain = terrainClass.create({coords: {cellX: col, cellY: row}});
-                mapRow.push({terrain: terrain, object: null});
+            for (let cell = 0; cell < this.size * 2 + 1; cell++) {
+                if (this.isCellInsideMap({cellX: cell, cellY: row})) {
+                    const terrainClass = loader.getClass('dark-green-tile');
+                    const terrain = terrainClass.create({coords: {cellX: cell, cellY: row}});
+                    mapRow.push({terrain: terrain, object: null});
+                } else {
+                    mapRow.push(null);
+                }
             }
             this.grid.push(mapRow);
         }
     },
-    fill: function({name, grid}) {
+    fill: function({name, size, grid}) {
         this.name = name;
+        this.size = size;
         this.grid = [];
         this.listOfAllObjects = [];
         for (let row of grid) {
             const mapRow = [];
             for (let cell of row) {
-                const terrain = loader.getClass(cell.terrain.class).create(cell.terrain.properties);
-                if (cell.object) {
-                    const object = loader.getClass(cell.object.class).create(cell.object.properties);
-                    this.listOfAllObjects.push(object);
+                if (cell) {
+                    const terrain = loader.getClass(cell.terrain.class).create(cell.terrain.properties);
+                    if (cell.object) {
+                        const object = loader.getClass(cell.object.class).create(cell.object.properties);
+                        this.listOfAllObjects.push(object);
+                    }
+                    mapRow.push({terrain: terrain, object: null});
+                } else {
+                    mapRow.push(null);
                 }
-                mapRow.push({terrain: terrain, object: null});
             }
             this.grid.push(mapRow);
         }
@@ -50,22 +60,27 @@ export const map = {
     createMapFile: function() {
         const mapFile = {
             name: this.name,
+            size: this.size,
             grid: []
         };
         for (let row = 0; row < this.grid.length; row++) {
             const mapFileRow = [];
             for (let cell = 0; cell < this.grid[0].length; cell++) {
-                const terrain = this.grid[row][cell].terrain;
-                const terrainRecord = {
-                    class: terrain.class.name,
-                    properties: terrain.properties
-                };
-                const object = this.grid[row][cell].object;
-                const objectRecord = (object && row == object.properties.coords.cellY && cell == object.properties.coords.cellX) ? {
-                    class: object.class.name,
-                    properties: object.properties
-                } : null;
-                mapFileRow.push({terrain: terrainRecord, object: objectRecord});
+                if (this.isCellInsideMap({cellX: cell, cellY: row})) {
+                    const terrain = this.grid[row][cell].terrain;
+                    const terrainRecord = {
+                        class: terrain.class.name,
+                        properties: terrain.properties
+                    };
+                    const object = this.grid[row][cell].object;
+                    const objectRecord = (object && row == object.properties.coords.cellY && cell == object.properties.coords.cellX) ? {
+                        class: object.class.name,
+                        properties: object.properties
+                    } : null;
+                    mapFileRow.push({terrain: terrainRecord, object: objectRecord});
+                } else {
+                    mapFileRow.push(null);
+                }                
             }
             mapFile.grid.push(mapFileRow);
         }
