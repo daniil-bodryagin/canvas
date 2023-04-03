@@ -124,11 +124,28 @@ export const camera = {
                 if (cursor.obstacles) {
                     const obstacleClass = loader.getClass('obstacle');
                     const obstacleImage = obstacleClass.image;
-                    for (let obstacleCoords of cursor.obstacles) {
-                        const {cellX, cellY} = obstacleCoords;
-                        for (let row = obstacleClass.size.rightLength - 1; row >=0; row--) {
-                            const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, obstacleImage, obstacleClass.offset.x, obstacleClass.offset.y, obstacleClass.getDelta({cellX, cellY}, cellY - row));
-                            canvasCtx.drawImage(obstacleImage, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
+                    const buildIndicatorClass = loader.getClass('buildIndicator');
+                    const buildIndiatorImage = buildIndicatorClass.image;
+                    const buildIndicators = [];
+                    for (let row = 0; row < className.size.rightLength; row++) {
+                        const buildIndicatorsRow = [];
+                        for (let cell = 0; cell < className.size.leftLength; cell++) {
+                            buildIndicatorsRow.push('indicator');
+                        }
+                        buildIndicators.push(buildIndicatorsRow);
+                    }
+                    for (let {cellX, cellY} of cursor.obstacles) {
+                        buildIndicators[className.size.rightLength - (cursor.getCoords().cellY - cellY + 1)][cellX - cursor.getCoords().cellX] = 'obstacle';
+                    }
+                    for (let row = 0; row < buildIndicators.length; row++) {
+                        for (let col = 0; col < buildIndicators[row].length; col++) {
+                            if (buildIndicators[row][col] == 'indicator') {
+                                const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX: cursor.getCoords().cellX + col, cellY: cursor.getCoords().cellY - (className.size.rightLength - row - 1)}, buildIndiatorImage, buildIndicatorClass.offset.x, buildIndicatorClass.offset.y, buildIndicatorClass.getDelta({cellX, cellY}, cellY));
+                                canvasCtx.drawImage(buildIndiatorImage, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
+                            } else {
+                                const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX: cursor.getCoords().cellX + col, cellY: cursor.getCoords().cellY - (className.size.rightLength - row - 1)}, obstacleImage, obstacleClass.offset.x, obstacleClass.offset.y, obstacleClass.getDelta({cellX, cellY}, cellY));
+                                canvasCtx.drawImage(obstacleImage, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
+                            }
                         }
                     }
                 }

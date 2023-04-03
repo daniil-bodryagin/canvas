@@ -460,7 +460,7 @@ export const environmentals = [
             rightLength: 1
         },
         offset: {
-            x: 7,
+            x: 9,
             y: 9
         },
         source: `${path.environmentals}ball-orange.png`,
@@ -476,7 +476,7 @@ export const environmentals = [
             rightLength: 1
         },
         offset: {
-            x: 7,
+            x: 9,
             y: 9
         },
         source: `${path.environmentals}ball-red.png`,
@@ -492,7 +492,7 @@ export const environmentals = [
             rightLength: 1
         },
         offset: {
-            x: 7,
+            x: 9,
             y: 9
         },
         source: `${path.environmentals}ball-teal.png`,
@@ -508,7 +508,7 @@ export const environmentals = [
             rightLength: 1
         },
         offset: {
-            x: 7,
+            x: 9,
             y: 9
         },
         source: `${path.environmentals}ball-violet.png`,
@@ -562,6 +562,19 @@ export const hud = [
             y: 0
         },
         source: `${path.hud}obstacle.png`,
+        getDelta: getDelta
+    },
+    {
+        name: 'buildIndicator',
+        size: {
+            leftLength: 1,
+            rightLength: 1
+        },
+        offset: {
+            x: 0,
+            y: 0
+        },
+        source: `${path.hud}indicator.png`,
         getDelta: getDelta
     }
 ]
