@@ -1,3 +1,4 @@
+import { $canvas } from './camera.js';
 import { cursor } from './cursor.js';
 import { menuItemActions } from './menuItem.js';
 import { editActions } from './editButton.js';
@@ -30,6 +31,7 @@ const menuActions = {
                 $menuItem.classList.toggle('menu-item-selected');
             } else {
                 $menuItem.classList.remove('menu-item-selected');
+                $canvas.focus();
             }
         }
         for (let $panel of $menuPanels) {
@@ -37,6 +39,7 @@ const menuActions = {
                 $panel.classList.toggle('show-panel');
             } else {
                 $panel.classList.remove('show-panel');
+                $canvas.focus();
             }
         }
         if (menuItemActions[targetPanelName] && $targetMenuElement.classList.contains('menu-item-selected')) 
@@ -45,9 +48,11 @@ const menuActions = {
     'menu-submit': function($targetMenuElement) {
         const $menuForm = $targetMenuElement.closest('.form');
         formActions[$menuForm.dataset.action]($menuForm);
+        $canvas.focus();
     },
     'menu-edit': function($targetMenuElement) {
         cursor.setCursorMode($targetMenuElement.dataset.action, $targetMenuElement.dataset.kind);
+        $canvas.focus();
         if (editActions[$targetMenuElement.dataset.action]) {
             editActions[$targetMenuElement.dataset.action]($targetMenuElement);
         }            
@@ -61,8 +66,10 @@ const menuActions = {
     },
     'menu-close': function($targetMenuElement) {
         $targetMenuElement.closest('.panel').classList.remove('show-panel');
+        $canvas.focus();
     },
     'asset-select': function($targetMenuElement) {
         cursor.setClass(loader.getClass($targetMenuElement.id));
+        $canvas.focus();
     }
 }

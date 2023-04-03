@@ -158,35 +158,39 @@ export const camera = {
 }
 
 function handleKeydown({key}) {
-    switch (key) {
-        case 'ArrowUp': 
-            if (camera.cameraSpeed.y <= 0) camera.cameraSpeed.y = - camera.cameraSpeedLimit;
-            break;
-        case 'ArrowDown':
-            if (camera.cameraSpeed.y >= 0) camera.cameraSpeed.y = camera.cameraSpeedLimit;
-            break;
-        case 'ArrowLeft':
-            if (camera.cameraSpeed.x <= 0) camera.cameraSpeed.x = - camera.cameraSpeedLimit;
-            break;
-        case 'ArrowRight':
-            if (camera.cameraSpeed.x >= 0) camera.cameraSpeed.x = camera.cameraSpeedLimit;
-            break;
+    if ($canvas == document.activeElement) {
+        switch (key) {
+            case 'ArrowUp': 
+                if (camera.cameraSpeed.y <= 0) camera.cameraSpeed.y = - camera.cameraSpeedLimit;
+                break;
+            case 'ArrowDown':
+                if (camera.cameraSpeed.y >= 0) camera.cameraSpeed.y = camera.cameraSpeedLimit;
+                break;
+            case 'ArrowLeft':
+                if (camera.cameraSpeed.x <= 0) camera.cameraSpeed.x = - camera.cameraSpeedLimit;
+                break;
+            case 'ArrowRight':
+                if (camera.cameraSpeed.x >= 0) camera.cameraSpeed.x = camera.cameraSpeedLimit;
+                break;
+        }
     }
 }
 
 function handleKeyup({key}) {
-    switch (key) {
-        case 'ArrowUp': 
-            if (camera.cameraSpeed.y <= 0) camera.cameraSpeed.y = 0;
-            break;
-        case 'ArrowDown':
-            if (camera.cameraSpeed.y >= 0) camera.cameraSpeed.y = 0;
-            break;
-        case 'ArrowLeft':
-            if (camera.cameraSpeed.x <= 0) camera.cameraSpeed.x = 0;
-            break;
-        case 'ArrowRight':
-            if (camera.cameraSpeed.x >= 0) camera.cameraSpeed.x = 0;
-            break;
+    if ($canvas == document.activeElement) {
+        switch (key) {
+            case 'ArrowUp': 
+                if (camera.cameraSpeed.y <= 0) camera.cameraSpeed.y = 0;
+                break;
+            case 'ArrowDown':
+                if (camera.cameraSpeed.y >= 0) camera.cameraSpeed.y = 0;
+                break;
+            case 'ArrowLeft':
+                if (camera.cameraSpeed.x <= 0) camera.cameraSpeed.x = 0;
+                break;
+            case 'ArrowRight':
+                if (camera.cameraSpeed.x >= 0) camera.cameraSpeed.x = 0;
+                break;
+        }
     }
 }

@@ -1,4 +1,3 @@
-import { terrains } from './config.js';
 import { map } from './map.js';
 
 export const formActions = {
@@ -14,7 +13,7 @@ export const formActions = {
             fetch(`http://127.0.0.1:8000/maps/${$selectedMap.dataset.name}.json`)
             .then(response => response.json())
             .then(result => map.fill(JSON.parse(result)))
-            // .catch(error => console.log(`Server doesn't respond`));
+            .catch(error => console.log(`Server doesn't respond`));
         }
     },
     save: function($menuForm) {
