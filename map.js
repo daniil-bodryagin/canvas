@@ -96,6 +96,9 @@ export const map = {
         this.listOfAllObjects.push(object);
     },
     isCellInsideMap: function({cellX, cellY}) {
-        return cellY < this.getGridSize() && cellY >= 0 && cellX < this.getGridSize() && cellX >= 0;
+        return cellX + cellY >= this.getSize()
+            && cellX + cellY <= 2 * (this.getSize() + 1)
+            && cellX - cellY <= this.getSize()
+            && cellY - cellX <= this.getSize();
     }
 };
