@@ -7,20 +7,14 @@ export const map = {
     getName: function() {
         return this.name;
     },
-    getSize: function() {
-        return this.size;
-    },
-    getGridSize: function() {
-        return this.grid.length;
-    },
-    new: function(name, size) {
+    new: function(name, width, height) {
         this.name = name;
-        this.size = size;
+        this.size = {width, height};
         this.grid = [];
         this.listOfAllObjects = [];
-        for (let row = 0; row < this.size * 2 + 1; row++) {
+        for (let row = 0; row < this.size.width + this.size.height + 1; row++) {
             const mapRow = [];
-            for (let cell = 0; cell < this.size * 2 + 1; cell++) {
+            for (let cell = 0; cell < this.size.width + this.size.height + 1; cell++) {
                 if (this.isCellInsideMap({cellX: cell, cellY: row})) {
                     const terrainClass = loader.getClass('dark-green-tile');
                     const terrain = terrainClass.create({coords: {cellX: cell, cellY: row}});
@@ -32,9 +26,9 @@ export const map = {
             this.grid.push(mapRow);
         }
     },
-    fill: function({name, size, grid}) {
+    fill: function({name, size: {width, height}, grid}) {
         this.name = name;
-        this.size = size;
+        this.size = {width, height};
         this.grid = [];
         this.listOfAllObjects = [];
         for (let row of grid) {
@@ -111,9 +105,9 @@ export const map = {
         this.listOfAllObjects.push(object);
     },
     isCellInsideMap: function({cellX, cellY}) {
-        return cellX + cellY >= this.getSize()
-            && cellX + cellY <= 2 * (this.getSize() + 1)
-            && cellX - cellY <= this.getSize()
-            && cellY - cellX <= this.getSize();
+        return cellX + cellY >= this.size.height
+            && cellX + cellY <= 2 * this.size.width + this.size.height
+            && cellX - cellY <= this.size.height
+            && cellY - cellX <= this.size.height;
     }
 };

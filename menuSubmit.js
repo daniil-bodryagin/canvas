@@ -4,8 +4,9 @@ import { map } from './map.js';
 export const formActions = {
     new: function($menuForm) {
         const name = $menuForm.querySelector('#name').value;
-        const size = parseInt($menuForm.querySelector('#size').value);
-        map.new(name, size);
+        const width = parseInt($menuForm.querySelector('#width').value);
+        const height = parseInt($menuForm.querySelector('#height').value);
+        map.new(name, width, height);
     },
     open: function($menuForm) {
         const $selectedMap = $menuForm.querySelector('input:checked');

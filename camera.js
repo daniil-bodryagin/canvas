@@ -43,7 +43,7 @@ export const camera = {
         this.resize();
     },
     getCellUnderCursor: function(cursorX, cursorY) {
-        const cellX = map.getSize() + Math.ceil((cursorX + this.cameraCoords.x - 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIDTH) / CELL_WIDTH);
+        const cellX = map.size.height + Math.ceil((cursorX + this.cameraCoords.x - 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIDTH) / CELL_WIDTH);
         const cellY = Math.ceil((cursorX + this.cameraCoords.x + 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIDTH) / CELL_WIDTH);
         return {cellX, cellY};
     },
@@ -52,8 +52,8 @@ export const camera = {
         const dy = (dCellsY == dCellsHeight) ? 0 : image.height - dCellsY * CELL_HALF_HEIGHT;
         const dWidth = image.width - dCellsX * CELL_HALF_HEIGHT;
         const dHeight = (dCellsY == dCellsHeight) ? image.height - (dCellsHeight - 1) * CELL_HALF_HEIGHT : CELL_HALF_HEIGHT;
-        const imageX = (cellY + (cellX - map.getSize()) - 1) * CELL_HALF_WIDTH - this.cameraCoords.x + offsetX;
-        const imageY = (cellY - (cellX - map.getSize()) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - dHeight - offsetY;
+        const imageX = (cellY + (cellX - map.size.height) - 1) * CELL_HALF_WIDTH - this.cameraCoords.x + offsetX;
+        const imageY = (cellY - (cellX - map.size.height) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - dHeight - offsetY;
         return {dx, dy, dWidth, dHeight, imageX, imageY};
     },
     isImageVisible: function(image, {imageX, imageY}) {
@@ -76,7 +76,7 @@ export const camera = {
                 const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, image, offsetX, offsetY, content.class.getDelta(content.properties.coords, cellY));
                 if (this.isImageVisible(image, {imageX, imageY})) canvasCtx.drawImage(image, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
 
-                //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
+                canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
             }
         }
     },
@@ -84,7 +84,7 @@ export const camera = {
         const rowLength = type == 'odd' ? this.screenCells.width + 3 : this.screenCells.width + 2;
         for (let col = -MAX_OBJECT_WIDTH; col < rowLength + MAX_OBJECT_WIDTH; col++) {
             const cellY = type == 'odd' ? this.startCell.x + this.startCell.y + col + row : this.startCell.x + this.startCell.y + col + 1 + row;
-            const cellX = this.startCell.x - this.startCell.y + map.getSize() + col - row;
+            const cellX = this.startCell.x - this.startCell.y + map.size.height + col - row;
             if (map.isCellInsideMap({cellX, cellY})) {
                 this.drawCell(cellX, cellY, layer);                       
             }                    
@@ -101,7 +101,7 @@ export const camera = {
         this.startCell.x = Math.floor(this.cameraCoords.x / CELL_WIDTH);
         this.startCell.y = Math.floor(this.cameraCoords.y / CELL_HEIGHT);
 
-        //canvasCtx.strokeStyle = "white"
+        canvasCtx.strokeStyle = "white"
 
         if (!map.isEmpty()) {
             for (let row = 0; row < this.screenCells.height + 3 + MAX_OBJECT_HEIGHT; row++) {
