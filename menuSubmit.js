@@ -1,30 +1,30 @@
-import { map } from './map.js';
+import { gameMap } from './gameMap.js';
 
 export const formActions = {
     new: function($menuForm) {
         const name = $menuForm.querySelector('#name').value;
         const width = parseInt($menuForm.querySelector('#width').value);
         const height = parseInt($menuForm.querySelector('#height').value);
-        map.new(name, width, height);
+        gameMap.new(name, width, height);
     },
     open: function($menuForm) {
         const $selectedMap = $menuForm.querySelector('input:checked');
         if ($selectedMap) {
             fetch(`http://127.0.0.1:8000/maps/${$selectedMap.dataset.name}.json`)
             .then(response => response.json())
-            .then(result => map.fill(JSON.parse(result)))
+            .then(result => gameMap.fill(JSON.parse(result)))
             .catch(error => console.log(`Server doesn't respond`));
         }
     },
     save: function($menuForm) {
         const name = $menuForm.querySelector('#name-save').value;
-        if (!map.isEmpty()) {
+        if (!gameMap.isEmpty()) {
             fetch(`http://127.0.0.1:8000/maps/${name}.json`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
                 },
-                body: JSON.stringify(map.createMapFile())
+                body: JSON.stringify(gameMap.createMapFile())
             }).then(response => {
                 return response.json()
             }).then(result => alert(result.message)).catch(error => console.log(`Server doesn't respond`));

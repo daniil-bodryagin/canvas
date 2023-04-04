@@ -1,5 +1,5 @@
 import { $canvas, camera } from "./camera.js";
-import { map } from "./map.js";
+import { gameMap } from "./gameMap.js";
 
 export const cursor = {
     mode: 'stop',
@@ -36,19 +36,19 @@ export const cursor = {
 const placeObject = function() {
     const className = cursor.getClass();
     const object = className.create({coords: cursor.getCoords()});
-    map.setCellContent(cursor.getCoords(), object, cursor.layer);
-    map.addToList(object);
+    gameMap.setCellContent(cursor.getCoords(), object, cursor.layer);
+    gameMap.addToList(object);
 
 }
 
 const cursorFunctions = {
     assets: {
         mousemove: function({clientX, clientY}) {
-            if (!map.isEmpty()) {
+            if (!gameMap.isEmpty()) {
                 const {cellX, cellY} = camera.getCellUnderCursor(clientX, clientY);
                 if (cursor.isCellChanged(cellX, cellY)) {
                     cursor.setCoords(cellX, cellY);
-                    cursor.obstacles = map.getObstacles(cursor.getCoords(), cursor.getClass());
+                    cursor.obstacles = gameMap.getObstacles(cursor.getCoords(), cursor.getClass());
                     if (cursor.isDragging && !cursor.obstacles) {
                         placeObject();
                     } 
@@ -56,7 +56,7 @@ const cursorFunctions = {
             }
         },
         mousedown: function() {
-            if (!map.isEmpty()) {
+            if (!gameMap.isEmpty()) {
                 cursor.isDragging = true;
                 if (!cursor.obstacles) {
                     placeObject();
@@ -64,12 +64,12 @@ const cursorFunctions = {
             }
         },
         mouseup: function() {
-            if (!map.isEmpty()) {
+            if (!gameMap.isEmpty()) {
                 cursor.isDragging = false;
             }
         },
         mouseout: function () {
-            if (!map.isEmpty()) {
+            if (!gameMap.isEmpty()) {
                 cursor.setCoords(Infinity, Infinity);
                 cursor.isDragging = false;
             }

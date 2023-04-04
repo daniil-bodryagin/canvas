@@ -1,6 +1,6 @@
 import { loader } from "./loader.js";
 
-export const map = {
+export const gameMap = {
     isEmpty: function() {
         return this.name ? false: true;
     },

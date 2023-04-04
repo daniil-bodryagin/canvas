@@ -1,9 +1,9 @@
-import { map } from './map.js';
+import { gameMap } from './gameMap.js';
 
 export const menuItemActions = {
     open: createMapList,
     save: function() {  
-        if (!map.isEmpty()) document.querySelector('#name-save').value = map.getName();
+        if (!gameMap.isEmpty()) document.querySelector('#name-save').value = gameMap.getName();
     },
     delete: createMapList
 }
