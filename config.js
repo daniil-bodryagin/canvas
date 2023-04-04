@@ -4,11 +4,12 @@ const path = {
     hud: 'img/hud/'
 }
 
-function getDelta({cellY: baseCellY}, currentCellY) {
-    const dCellsX = this.size.rightLength - (baseCellY - currentCellY + 1);
-    const dCellsY = baseCellY - currentCellY + 1;
-    const dCellsHeight = this.size.rightLength;
-    return {dCellsX, dCellsY, dCellsHeight};
+function getDelta({cellX: baseCellX, cellY: baseCellY}, currentCellX, currentCellY) {
+    const startLine = this.size.rightLength - (baseCellY - currentCellY + 1) + (currentCellX - baseCellX) + ((currentCellX - baseCellX > 0) ? 1 : 0);
+    const endLine = this.size.rightLength - (baseCellY - currentCellY) + (currentCellX - baseCellX) + ((baseCellY - currentCellY == 0) ? 1 : 0);
+    const upLine = (baseCellY - currentCellY) + (currentCellX - baseCellX);
+    const shift = (currentCellX - baseCellX > 0) ? 1 : 0;
+    return {startLine, endLine, upLine, shift};
 }
 
 const create = {
@@ -16,8 +17,8 @@ const create = {
         return {
             class: this,
             properties: settings || this.defaultSettings,
-            getImageWithOffsets: function({cellX}) {
-                return (this.properties.coords.cellX == cellX) 
+            getImageWithOffsets: function({cellX, cellY}) {
+                return (this.properties.coords.cellX == cellX || this.properties.coords.cellY == cellY) 
                         ? {
                             image: this.class.image,
                             offsetX: this.class.offset.x,
@@ -38,8 +39,8 @@ const create = {
         return {
             class: this,
             properties: settings || this.defaultSettings,
-            getImageWithOffsets: function({cellX}) {
-                return (this.properties.coords.cellX == cellX) 
+            getImageWithOffsets: function({cellX, cellY}) {
+                return (this.properties.coords.cellX == cellX || this.properties.coords.cellY == cellY) 
                         ? {
                             image: this.class.image,
                             offsetX: this.class.offset.x,
