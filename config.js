@@ -1,3 +1,5 @@
+import { selectionHelper } from "./selectionHelper.js";
+
 const path = {
     terrains: 'img/terrains/',
     environmentals: 'img/environmentals/',
@@ -36,7 +38,7 @@ const create = {
         };
     },
     environmentals: function(settings) {
-        return {
+        const object = {
             class: this,
             properties: settings || this.defaultSettings,
             getImageWithOffsets: function({cellX, cellY}) {
@@ -52,10 +54,15 @@ const create = {
                             offsetY: null
                         };
             },
+            getShadow: function({cellX, cellY}) {
+                return (this.properties.coords.cellX == cellX || this.properties.coords.cellY == cellY) ? this.shadow : null;
+            },
             getCellSize: function() {
                 return this.class.size;
             }
         };
+        selectionHelper.createShadow(object);
+        return object;
     }
 }
 

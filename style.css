@@ -11,6 +11,14 @@ html, body {
     display: block;
 }
 
+.canvas:focus-visible {
+    outline: none;
+}
+
+.selection {
+    display: none;
+}
+
 .menu {
     position: absolute;
     top: 0;

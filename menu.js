@@ -20,6 +20,7 @@ export const menu = {
         document.onsubmit = function(event) {
             event.preventDefault();
         };
+        cursor.init();
     }
 }
 

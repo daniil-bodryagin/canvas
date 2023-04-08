@@ -1,9 +1,14 @@
 import { $canvas, camera } from "./camera.js";
 import { gameMap } from "./gameMap.js";
+import { selectionHelper } from "./selectionHelper.js";
 
 export const cursor = {
     mode: 'stop',
+    kind: 'environmentals',
     obstacles: null,
+    init: function() {
+        this.setCursorMode(this.mode, this.kind);
+    },
     isCellChanged: function(cellX, cellY) {
         return cellX != this.cellX || cellY != this.cellY;
     },
@@ -38,7 +43,6 @@ const placeObject = function() {
     const object = className.create({coords: cursor.getCoords()});
     gameMap.setCellContent(cursor.getCoords(), object, cursor.layer);
     gameMap.addToList(object);
-
 }
 
 const cursorFunctions = {
@@ -78,7 +82,12 @@ const cursorFunctions = {
     stop: {
         mousemove: null,
         mousedown: null,
-        mouseup: null,
+        mouseup: function({clientX, clientY}) {
+            if (!gameMap.isEmpty()) {
+                const pixel = camera.getShadowColorUnderCursor(clientX, clientY);
+                cursor.selectedObject = selectionHelper.getSelectedObject(pixel);
+            }
+        },
         mouseout: null
     }
 }

@@ -11,6 +11,8 @@ const MAX_OBJECT_HEIGHT = 30;
 
 export const $canvas = document.querySelector('.canvas');
 const canvasCtx = $canvas.getContext('2d');
+const $selectionCanvas = document.querySelector('.selection');
+const selectionCtx = $selectionCanvas.getContext('2d', { willReadFrequently: true });
 
 export const camera = {
     screenSize: {
@@ -47,6 +49,9 @@ export const camera = {
         const cellY = Math.ceil((cursorX + this.cameraCoords.x + 2 * (cursorY + this.cameraCoords.y) - CELL_HALF_WIDTH) / CELL_WIDTH);
         return {cellX, cellY};
     },
+    getShadowColorUnderCursor: function(cursorX, cursorY) {
+        return selectionCtx.getImageData(cursorX, cursorY, 1, 1);
+    },
     getImageCoordsForCanvas: function({cellX, cellY}, image, offsetX, offsetY, {startLine, endLine, upLine, shift}) {
         let dx;
         let dWidth;
@@ -71,6 +76,22 @@ export const camera = {
         const imageY = (cellY - (cellX - gameMap.size.height) + upLine + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - image.height - offsetY;
         return {dx, dy, dWidth, dHeight, imageX, imageY};
     },
+    getFrameCoords: function(object) {
+        const cellX = object.properties.coords.cellX;
+        const cellY = object.properties.coords.cellY;
+        const image = object.class.image;
+        const offsetX = object.class.offset.x;
+        const offsetY = object.class.offset.y;
+        const shift = (object.class.size.rightLength - 1) * CELL_HALF_WIDTH;
+        const frameStartX = (cellY + (cellX - gameMap.size.height) - 1) * CELL_HALF_WIDTH + offsetX - this.cameraCoords.x - shift - 1;
+        const frameStartY = (cellY - (cellX - gameMap.size.height) + 1) * CELL_HALF_HEIGHT - this.cameraCoords.y - image.height - offsetY - 1;
+        const frameEndX = frameStartX + image.width + 1;
+        const frameEndY = frameStartY + image.height + 1
+        //return {frameStartX, frameStartY, frameEndX, frameEndY};
+        const width = image.width + 1;
+        const height = image.height + 1;
+        return {frameStartX, frameStartY, width, height};
+    },
     isImageVisible: function(image, {imageX, imageY}) {
         return ((imageX >= 0 && imageX <= this.screenSize.width) || 
                 (imageX + image.width >= 0 && imageX + image.width <= this.screenSize.width)) &&
@@ -82,6 +103,8 @@ export const camera = {
         this.screenSize.width = document.documentElement.clientWidth;
         $canvas.setAttribute('height', this.screenSize.height);
         $canvas.setAttribute('width', this.screenSize.width);
+        $selectionCanvas.setAttribute('height', this.screenSize.height);
+        $selectionCanvas.setAttribute('width', this.screenSize.width);
     },
     drawCursor: function() {
         canvasCtx.globalAlpha = 0.5;
@@ -100,7 +123,7 @@ export const camera = {
             const obstacleClass = loader.getClass('obstacle');
             const obstacleImage = obstacleClass.image;
             const buildIndicatorClass = loader.getClass('buildIndicator');
-            const buildIndiatorImage = buildIndicatorClass.image;
+            const buildIndicatorImage = buildIndicatorClass.image;
             const buildIndicators = [];
             for (let row = 0; row < className.size.rightLength; row++) {
                 const buildIndicatorsRow = [];
@@ -115,8 +138,8 @@ export const camera = {
             for (let row = 0; row < buildIndicators.length; row++) {
                 for (let col = 0; col < buildIndicators[row].length; col++) {
                     if (buildIndicators[row][col] == 'indicator') {
-                        const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX: cursor.getCoords().cellX + col, cellY: cursor.getCoords().cellY - (className.size.rightLength - row - 1)}, buildIndiatorImage, buildIndicatorClass.offset.x, buildIndicatorClass.offset.y, buildIndicatorClass.getDelta({cellX, cellY}, cellX, cellY));
-                        canvasCtx.drawImage(buildIndiatorImage, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
+                        const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX: cursor.getCoords().cellX + col, cellY: cursor.getCoords().cellY - (className.size.rightLength - row - 1)}, buildIndicatorImage, buildIndicatorClass.offset.x, buildIndicatorClass.offset.y, buildIndicatorClass.getDelta({cellX, cellY}, cellX, cellY));
+                        canvasCtx.drawImage(buildIndicatorImage, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
                     } else {
                         const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX: cursor.getCoords().cellX + col, cellY: cursor.getCoords().cellY - (className.size.rightLength - row - 1)}, obstacleImage, obstacleClass.offset.x, obstacleClass.offset.y, obstacleClass.getDelta({cellX, cellY}, cellX, cellY));
                         canvasCtx.drawImage(obstacleImage, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
@@ -126,14 +149,28 @@ export const camera = {
         }
         canvasCtx.globalAlpha = 1;
     },
+    drawSelectionFrame: function() {
+        //const {frameStartX, frameStartY, frameEndX, frameEndY} = this.getFrameCoords(cursor.selectedObject);
+        const {frameStartX, frameStartY, width, height} = this.getFrameCoords(cursor.selectedObject);
+        canvasCtx.strokeRect(frameStartX, frameStartY, width, height);
+        // canvasCtx.beginPath();
+        // canvasCtx.moveTo(frameStartX, frameStartY);
+        // canvasCtx.lineTo(frameEndX, frameEndY);
+        // canvasCtx.stroke();
+    },
     drawCell: function(cellX, cellY, layer) {
         const content = gameMap.getCellContent({cellX, cellY}, layer);
         if (content) {
             const {image, offsetX, offsetY} = content.getImageWithOffsets({cellX, cellY});
             if (image) {
                 const {dx, dy, dWidth, dHeight, imageX, imageY} = this.getImageCoordsForCanvas({cellX, cellY}, image, offsetX, offsetY, content.class.getDelta(content.properties.coords, cellX, cellY));
-                if (this.isImageVisible(image, {imageX, imageY})) canvasCtx.drawImage(image, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
-
+                if (this.isImageVisible(image, {imageX, imageY})) {
+                    canvasCtx.drawImage(image, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
+                    if (layer == 'object') {
+                        const shadow = content.getShadow({cellX, cellY});
+                        selectionCtx.drawImage(shadow, dx, dy, dWidth, dHeight, imageX, imageY, dWidth, dHeight);
+                    }
+                }
                 //canvasCtx.strokeText(`${cellY}, ${cellX}`, imageX + 16, imageY + 20); 
             }
         }
@@ -155,13 +192,14 @@ export const camera = {
         if (!gameMap.isEmpty() && newCameraY >= 0 && newCameraY <= gameMap.size.height * CELL_HEIGHT - this.screenSize.height) this.cameraCoords.y = newCameraY;
         //console.log(cameraCoords.x, cameraCoords.y);
         canvasCtx.fillRect(0, 0, this.screenSize.width, this.screenSize.height);
+        selectionCtx.fillRect(0, 0, this.screenSize.width, this.screenSize.height);
 
         this.screenCells.width = Math.floor(this.screenSize.width / CELL_WIDTH);
         this.screenCells.height = Math.floor(this.screenSize.height / CELL_HEIGHT);
         this.startCell.x = Math.floor(this.cameraCoords.x / CELL_WIDTH);
         this.startCell.y = Math.floor(this.cameraCoords.y / CELL_HEIGHT);
 
-        //canvasCtx.strokeStyle = "white"
+        canvasCtx.strokeStyle = "white"
 
         if (!gameMap.isEmpty()) {
             for (let row = 0; row < this.screenCells.height + 3 + MAX_OBJECT_HEIGHT; row++) {
@@ -174,7 +212,10 @@ export const camera = {
             }
             if (cursor.getClass() && gameMap.isCellInsideMap(cursor.getCoords())) {
                 this.drawCursor();
-            }           
+            }
+            if (cursor.selectedObject) {
+                this.drawSelectionFrame();
+            }
         }        
     }
 }
